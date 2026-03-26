@@ -9,25 +9,29 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <!-- SheetJS (xlsx) -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     /* ─── Reset & Base ─────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #f0f2f5;
-      --surface:  #ffffff;
-      --border:   #e2e8f0;
-      --primary:  #4f46e5;
+      --bg:            #f0f2f5;
+      --surface:       #ffffff;
+      --border:        #e2e8f0;
+      --primary:       #4f46e5;
       --primary-light: #ede9fe;
-      --text:     #1e293b;
-      --muted:    #64748b;
-      --green:    #10b981;
-      --amber:    #f59e0b;
-      --red:      #ef4444;
-      --blue:     #3b82f6;
-      --radius:   12px;
-      --shadow:   0 1px 3px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.06);
+      --text:          #1e293b;
+      --muted:         #64748b;
+      --green:         #10b981;
+      --amber:         #f59e0b;
+      --red:           #ef4444;
+      --blue:          #3b82f6;
+      --radius:        12px;
+      --shadow:        0 1px 3px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.06);
     }
 
     body {
@@ -55,6 +59,7 @@
     .logo-icon svg { width: 20px; height: 20px; fill: #fff; }
     header h1 { font-size: 1.25rem; font-weight: 700; color: var(--text); }
     header span { font-size: .8rem; color: var(--muted); margin-left: 4px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
 
     /* ─── Main Layout ───────────────────────────────── */
     main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
@@ -82,7 +87,7 @@
     }
     #upload-section .upload-icon svg { width: 32px; height: 32px; fill: var(--primary); }
     #upload-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
-    #upload-section p { color: var(--muted); margin-bottom: 24px; font-size: .95rem; }
+    #upload-section p  { color: var(--muted); margin-bottom: 24px; font-size: .95rem; }
     .badge-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
     .badge {
       background: var(--bg); border: 1px solid var(--border);
@@ -136,7 +141,7 @@
     }
     .stat-card .label { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
     .stat-card .value { font-size: 1.75rem; font-weight: 800; color: var(--text); }
-    .stat-card .sub { font-size: .8rem; color: var(--muted); }
+    .stat-card .sub   { font-size: .8rem; color: var(--muted); }
     .stat-card .icon-wrap {
       width: 40px; height: 40px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
@@ -164,7 +169,7 @@
     }
     .chart-card h3 { font-size: .9rem; font-weight: 700; color: var(--muted); margin-bottom: 20px; text-transform: uppercase; letter-spacing: .04em; }
     .chart-wrap { position: relative; }
-    #barChart  { max-height: 280px; }
+    #barChart   { max-height: 280px; }
     #donutChart { max-height: 260px; }
 
     /* ─── Transactions Table ────────────────────────── */
@@ -206,7 +211,7 @@
       background: var(--primary-light); color: var(--primary);
     }
     .amount-cell { font-weight: 700; }
-    .amount-pos { color: var(--red); }
+    .amount-pos  { color: var(--red); }
 
     /* ─── Pagination ─────────────────────────────────── */
     .pagination {
@@ -221,19 +226,14 @@
       transition: background .15s, border-color .15s;
     }
     .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-    .page-btn:disabled { opacity: .45; cursor: default; }
-    .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .page-btn:disabled  { opacity: .45; cursor: default; }
+    .page-btn.active    { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     /* ─── Footer ─────────────────────────────────────── */
-    .footer {
-      text-align: center; padding: 24px; font-size: .8rem; color: var(--muted);
-    }
+    .footer { text-align: center; padding: 24px; font-size: .8rem; color: var(--muted); }
 
     /* ─── Loader ─────────────────────────────────────── */
-    #loader {
-      display: none; text-align: center;
-      padding: 48px; color: var(--muted);
-    }
+    #loader { display: none; text-align: center; padding: 48px; color: var(--muted); }
     .spinner {
       width: 40px; height: 40px; border: 4px solid var(--border);
       border-top-color: var(--primary); border-radius: 50%;
@@ -241,13 +241,40 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ─── Reset Button ──────────────────────────────── */
+    /* ─── Buttons ───────────────────────────────────── */
     .btn-reset {
       background: transparent; border: 1px solid var(--border);
       border-radius: 8px; padding: 8px 18px; font-size: .85rem;
       cursor: pointer; color: var(--muted); transition: all .2s;
     }
     .btn-reset:hover { border-color: var(--red); color: var(--red); }
+
+    .btn-download {
+      background: #10b981; color: #fff;
+      border: none; border-radius: 8px;
+      padding: 8px 18px; font-size: .85rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 7px;
+      transition: opacity .2s;
+    }
+    .btn-download:hover  { opacity: .88; }
+    .btn-download:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-download svg { width: 16px; height: 16px; fill: #fff; flex-shrink: 0; }
+
+    /* ─── PDF Overlay ────────────────────────────────── */
+    #pdf-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,23,42,.55); backdrop-filter: blur(4px);
+      z-index: 9999; align-items: center; justify-content: center;
+    }
+    #pdf-overlay.show { display: flex; }
+    .pdf-toast {
+      background: #fff; border-radius: 14px; padding: 32px 40px;
+      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      min-width: 260px;
+    }
+    .pdf-toast .spinner { margin-bottom: 12px; }
+    .pdf-toast p { font-weight: 600; font-size: 1rem; color: var(--text); margin-bottom: 4px; }
+    .pdf-toast small { color: var(--muted); font-size: .82rem; }
   </style>
 </head>
 <body>
@@ -259,8 +286,23 @@
   </div>
   <h1>ExpenseLens <span>Business Expense Analyzer</span></h1>
   <div style="flex:1"></div>
-  <button class="btn-reset" id="reset-btn" style="display:none" onclick="resetApp()">&#8635; New File</button>
+  <div class="header-actions">
+    <button class="btn-download" id="download-btn" style="display:none" onclick="downloadReport()">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      Download Report
+    </button>
+    <button class="btn-reset" id="reset-btn" style="display:none" onclick="resetApp()">&#8635; New File</button>
+  </div>
 </header>
+
+<!-- ─── PDF Overlay ─────────────────────────────────── -->
+<div id="pdf-overlay">
+  <div class="pdf-toast">
+    <div class="spinner"></div>
+    <p>Generating PDF Report…</p>
+    <small>This may take a few seconds</small>
+  </div>
+</div>
 
 <!-- ─── Main ────────────────────────────────────────── -->
 <main>
@@ -311,7 +353,7 @@
         </div>
         <div class="label">Total Expenses</div>
         <div class="value" id="stat-total">—</div>
-        <div class="sub" id="stat-count">0 transactions</div>
+        <div class="sub"   id="stat-count">0 transactions</div>
       </div>
       <div class="stat-card">
         <div class="icon-wrap icon-largest">
@@ -319,7 +361,7 @@
         </div>
         <div class="label">Largest Expense</div>
         <div class="value" id="stat-largest">—</div>
-        <div class="sub" id="stat-largest-name">—</div>
+        <div class="sub"   id="stat-largest-name">—</div>
       </div>
       <div class="stat-card">
         <div class="icon-wrap icon-avg">
@@ -327,7 +369,7 @@
         </div>
         <div class="label">Average Expense</div>
         <div class="value" id="stat-avg">—</div>
-        <div class="sub" id="stat-avg-sub">per transaction</div>
+        <div class="sub"   id="stat-avg-sub">per transaction</div>
       </div>
       <div class="stat-card">
         <div class="icon-wrap icon-top">
@@ -335,17 +377,17 @@
         </div>
         <div class="label">Top Category</div>
         <div class="value" id="stat-top-cat" style="font-size:1.3rem">—</div>
-        <div class="sub" id="stat-top-amount">—</div>
+        <div class="sub"   id="stat-top-amount">—</div>
       </div>
     </div>
 
     <!-- Charts -->
     <div class="charts-row">
-      <div class="chart-card">
+      <div class="chart-card" id="bar-chart-card">
         <h3>Monthly Spending</h3>
         <div class="chart-wrap"><canvas id="barChart"></canvas></div>
       </div>
-      <div class="chart-card">
+      <div class="chart-card" id="donut-chart-card">
         <h3>Category Breakdown</h3>
         <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
       </div>
@@ -390,17 +432,16 @@
 /* ═══════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════ */
-let allRows = [];       // parsed & normalized rows
-let filtered = [];      // after search filter
+let allRows   = [];
+let filtered  = [];
 let currentPage = 1;
 const PAGE_SIZE = 15;
-let barChartInst = null;
+let barChartInst   = null;
 let donutChartInst = null;
 
-// Manual column mapping state
 let rawHeaders = [];
-let rawData = [];
-let colMap = { date: '', name: '', category: '', amount: '' };
+let rawData    = [];
+let colMap     = { date: '', name: '', category: '', amount: '' };
 
 /* ═══════════════════════════════════════════════════
    FILE HANDLING
@@ -411,36 +452,27 @@ function handleDrop(e) {
   const file = e.dataTransfer.files[0];
   if (file) processFile(file);
 }
-
 function handleFileUpload(e) {
   const file = e.target.files[0];
   if (file) processFile(file);
 }
-
 function processFile(file) {
   showLoader();
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
       const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type: 'array', cellDates: true });
-      const ws = wb.Sheets[wb.SheetNames[0]];
+      const wb   = XLSX.read(data, { type: 'array', cellDates: true });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-
       if (!json || json.length < 2) {
         alert('The file appears to be empty or has only one row. Please check your file.');
-        hideLoader();
-        return;
+        hideLoader(); return;
       }
-
       rawHeaders = json[0].map(h => String(h).trim());
-      rawData = json.slice(1).filter(row => row.some(cell => cell !== ''));
-
+      rawData    = json.slice(1).filter(row => row.some(cell => cell !== ''));
       autoDetectColumns();
-    } catch (err) {
-      alert('Error reading file: ' + err.message);
-      hideLoader();
-    }
+    } catch (err) { alert('Error reading file: ' + err.message); hideLoader(); }
   };
   reader.readAsArrayBuffer(file);
 }
@@ -449,36 +481,26 @@ function processFile(file) {
    COLUMN AUTO-DETECTION
 ═══════════════════════════════════════════════════ */
 function autoDetectColumns() {
-  const headers = rawHeaders;
-  const lower = headers.map(h => h.toLowerCase());
-
-  const dateKw    = ['date', 'day', 'time', 'period', 'when'];
-  const nameKw    = ['name', 'description', 'desc', 'expense', 'item', 'detail', 'memo', 'note', 'vendor', 'merchant', 'payee', 'title'];
-  const catKw     = ['category', 'cat', 'type', 'group', 'class', 'tag'];
-  const amountKw  = ['amount', 'total', 'cost', 'price', 'sum', 'value', 'spend', 'charge', 'debit', 'payment', 'paid'];
+  const lower    = rawHeaders.map(h => h.toLowerCase());
+  const dateKw   = ['date','day','time','period','when'];
+  const nameKw   = ['name','description','desc','expense','item','detail','memo','note','vendor','merchant','payee','title'];
+  const catKw    = ['category','cat','type','group','class','tag'];
+  const amountKw = ['amount','total','cost','price','sum','value','spend','charge','debit','payment','paid'];
 
   colMap.date     = findCol(lower, dateKw);
   colMap.name     = findCol(lower, nameKw);
   colMap.category = findCol(lower, catKw);
   colMap.amount   = findCol(lower, amountKw);
 
-  // If amount not found, try to find a numeric column
   if (colMap.amount === '') {
-    for (let i = 0; i < headers.length; i++) {
-      if (isNumericCol(i)) { colMap.amount = headers[i]; break; }
+    for (let i = 0; i < rawHeaders.length; i++) {
+      if (isNumericCol(i)) { colMap.amount = rawHeaders[i]; break; }
     }
   }
-
-  const missing = Object.entries(colMap).filter(([, v]) => v === '').map(([k]) => k);
-
-  if (missing.length === 0) {
-    buildDashboard();
-  } else {
-    hideLoader();
-    showColumnBanner(missing);
-  }
+  const missing = Object.entries(colMap).filter(([,v]) => v === '').map(([k]) => k);
+  if (missing.length === 0) buildDashboard();
+  else { hideLoader(); showColumnBanner(missing); }
 }
-
 function findCol(lower, keywords) {
   for (const kw of keywords) {
     const idx = lower.findIndex(h => h.includes(kw));
@@ -486,55 +508,41 @@ function findCol(lower, keywords) {
   }
   return '';
 }
-
 function isNumericCol(colIdx) {
   let count = 0;
   for (let i = 0; i < Math.min(rawData.length, 10); i++) {
     const val = rawData[i][colIdx];
-    if (val !== '' && !isNaN(parseFloat(String(val).replace(/[$,]/g, '')))) count++;
+    if (val !== '' && !isNaN(parseFloat(String(val).replace(/[$,]/g,'')))) count++;
   }
   return count >= 3;
 }
 
 /* ═══════════════════════════════════════════════════
-   COLUMN MAPPING BANNER (manual override)
+   COLUMN MAPPING BANNER
 ═══════════════════════════════════════════════════ */
 function showColumnBanner(missing) {
-  const banner = document.getElementById('column-map-banner');
+  const banner   = document.getElementById('column-map-banner');
   const controls = document.getElementById('col-map-controls');
   controls.innerHTML = '';
-
-  const options = rawHeaders.map(h => `<option value="${h}">${h}</option>`);
+  const options  = rawHeaders.map(h => `<option value="${h}">${h}</option>`);
   const blankOpt = `<option value="">-- Select --</option>`;
-
-  const labels = { date: 'Date Column', name: 'Expense Name / Description', category: 'Category', amount: 'Amount' };
-
+  const labels   = { date: 'Date Column', name: 'Expense Name / Description', category: 'Category', amount: 'Amount' };
   for (const key of Object.keys(colMap)) {
-    const isMissing = missing.includes(key);
     const label = document.createElement('label');
-    label.innerHTML = `${labels[key]}: <select id="map-${key}">
-      ${blankOpt}${options.join('')}
-    </select> `;
+    label.innerHTML = `${labels[key]}: <select id="map-${key}">${blankOpt}${options.join('')}</select> `;
     const sel = label.querySelector('select');
     if (colMap[key]) sel.value = colMap[key];
     controls.appendChild(label);
   }
-
   banner.style.display = 'block';
   document.getElementById('upload-section').style.display = 'none';
 }
-
 function applyColumnMap() {
   colMap.date     = document.getElementById('map-date')?.value     || '';
   colMap.name     = document.getElementById('map-name')?.value     || '';
   colMap.category = document.getElementById('map-category')?.value || '';
   colMap.amount   = document.getElementById('map-amount')?.value   || '';
-
-  if (!colMap.amount) {
-    alert('Please select at least the Amount column to continue.');
-    return;
-  }
-
+  if (!colMap.amount) { alert('Please select at least the Amount column to continue.'); return; }
   document.getElementById('column-map-banner').style.display = 'none';
   showLoader();
   setTimeout(buildDashboard, 50);
@@ -552,7 +560,7 @@ function buildDashboard() {
   allRows = [];
   for (const row of rawData) {
     const rawAmt = row[amountIdx];
-    let amount = parseFloat(String(rawAmt).replace(/[$,\s]/g, ''));
+    let amount   = parseFloat(String(rawAmt).replace(/[$,\s]/g,''));
     if (isNaN(amount)) continue;
     amount = Math.abs(amount);
 
@@ -561,25 +569,15 @@ function buildDashboard() {
     if (dateVal instanceof Date) {
       dateStr = dateVal.toISOString().split('T')[0];
     } else if (dateVal) {
-      // Try to parse numeric Excel serial date
       const num = parseFloat(String(dateVal));
       if (!isNaN(num) && num > 1000) {
         const parsed = XLSX.SSF.parse_date_code(num);
         if (parsed) dateStr = `${parsed.y}-${String(parsed.m).padStart(2,'0')}-${String(parsed.d).padStart(2,'0')}`;
-      } else {
-        dateStr = String(dateVal);
-      }
+      } else { dateStr = String(dateVal); }
     }
-
-    const name     = nameIdx     >= 0 ? String(row[nameIdx]     || '').trim() : '';
-    const category = catIdx      >= 0 ? String(row[catIdx]      || '').trim() : 'Uncategorized';
-
-    allRows.push({
-      date:     dateStr,
-      name:     name     || 'N/A',
-      category: category || 'Uncategorized',
-      amount
-    });
+    const name     = nameIdx >= 0 ? String(row[nameIdx]  || '').trim() : '';
+    const category = catIdx  >= 0 ? String(row[catIdx]   || '').trim() : 'Uncategorized';
+    allRows.push({ date: dateStr, name: name || 'N/A', category: category || 'Uncategorized', amount });
   }
 
   if (allRows.length === 0) {
@@ -597,52 +595,49 @@ function buildDashboard() {
 
   hideLoader();
   document.getElementById('upload-section').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  document.getElementById('reset-btn').style.display = '';
+  document.getElementById('dashboard').style.display      = 'block';
+  document.getElementById('reset-btn').style.display      = '';
+  document.getElementById('download-btn').style.display   = '';
 }
 
 /* ═══════════════════════════════════════════════════
    STATS
 ═══════════════════════════════════════════════════ */
 function renderStats() {
-  const total   = allRows.reduce((s, r) => s + r.amount, 0);
+  const total   = allRows.reduce((s,r) => s + r.amount, 0);
   const avg     = total / allRows.length;
-  const largest = allRows.reduce((m, r) => r.amount > m.amount ? r : m, allRows[0]);
-
-  // Top category
+  const largest = allRows.reduce((m,r) => r.amount > m.amount ? r : m, allRows[0]);
   const catTotals = {};
   for (const r of allRows) catTotals[r.category] = (catTotals[r.category] || 0) + r.amount;
-  const topCat = Object.entries(catTotals).sort((a, b) => b[1] - a[1])[0];
+  const topCat = Object.entries(catTotals).sort((a,b) => b[1]-a[1])[0];
 
-  document.getElementById('stat-total').textContent   = fmt(total);
-  document.getElementById('stat-count').textContent   = `${allRows.length} transactions`;
-  document.getElementById('stat-largest').textContent = fmt(largest.amount);
+  document.getElementById('stat-total').textContent        = fmt(total);
+  document.getElementById('stat-count').textContent        = `${allRows.length} transactions`;
+  document.getElementById('stat-largest').textContent      = fmt(largest.amount);
   document.getElementById('stat-largest-name').textContent = largest.name.length > 28 ? largest.name.slice(0,28)+'…' : largest.name;
-  document.getElementById('stat-avg').textContent     = fmt(avg);
-  document.getElementById('stat-top-cat').textContent = topCat[0];
-  document.getElementById('stat-top-amount').textContent = fmt(topCat[1]) + ' total';
+  document.getElementById('stat-avg').textContent          = fmt(avg);
+  document.getElementById('stat-top-cat').textContent      = topCat[0];
+  document.getElementById('stat-top-amount').textContent   = fmt(topCat[1]) + ' total';
 }
 
 /* ═══════════════════════════════════════════════════
    CHARTS
 ═══════════════════════════════════════════════════ */
 function renderCharts() {
-  // --- Monthly bar chart ---
   const monthly = {};
   for (const r of allRows) {
-    const key = r.date ? r.date.slice(0, 7) : 'Unknown'; // YYYY-MM
+    const key = r.date ? r.date.slice(0,7) : 'Unknown';
     monthly[key] = (monthly[key] || 0) + r.amount;
   }
   const sortedMonths = Object.keys(monthly).sort();
-  const monthLabels = sortedMonths.map(m => {
+  const monthLabels  = sortedMonths.map(m => {
     if (m === 'Unknown') return 'Unknown';
     const [y, mo] = m.split('-');
-    return new Date(+y, +mo - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' });
+    return new Date(+y, +mo-1, 1).toLocaleString('default', { month:'short', year:'2-digit' });
   });
 
   if (barChartInst) barChartInst.destroy();
-  const barCtx = document.getElementById('barChart').getContext('2d');
-  barChartInst = new Chart(barCtx, {
+  barChartInst = new Chart(document.getElementById('barChart').getContext('2d'), {
     type: 'bar',
     data: {
       labels: monthLabels,
@@ -650,62 +645,47 @@ function renderCharts() {
         label: 'Total Spending',
         data: sortedMonths.map(m => +monthly[m].toFixed(2)),
         backgroundColor: 'rgba(79,70,229,.85)',
-        borderRadius: 6,
-        borderSkipped: false,
+        borderRadius: 6, borderSkipped: false,
       }]
     },
     options: {
       responsive: true,
+      animation: { duration: 600 },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ' ' + fmt(ctx.raw) }
-        }
+        tooltip: { callbacks: { label: ctx => ' ' + fmt(ctx.raw) } }
       },
       scales: {
         x: { grid: { display: false } },
-        y: {
-          grid: { color: '#f1f5f9' },
-          ticks: { callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(1)+'k' : v) }
-        }
+        y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => '$'+(v>=1000 ? (v/1000).toFixed(1)+'k' : v) } }
       }
     }
   });
 
-  // --- Category donut chart ---
-  const catTotals = {};
+  const catTotals  = {};
   for (const r of allRows) catTotals[r.category] = (catTotals[r.category] || 0) + r.amount;
-  const sortedCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
-
-  const palette = [
-    '#4f46e5','#7c3aed','#db2777','#dc2626','#d97706',
-    '#65a30d','#0891b2','#0284c7','#7c3aed','#84cc16',
-  ];
+  const sortedCats = Object.entries(catTotals).sort((a,b) => b[1]-a[1]);
+  const palette    = ['#4f46e5','#7c3aed','#db2777','#dc2626','#d97706','#65a30d','#0891b2','#0284c7','#84cc16','#f97316'];
 
   if (donutChartInst) donutChartInst.destroy();
-  const donutCtx = document.getElementById('donutChart').getContext('2d');
-  donutChartInst = new Chart(donutCtx, {
+  donutChartInst = new Chart(document.getElementById('donutChart').getContext('2d'), {
     type: 'doughnut',
     data: {
       labels: sortedCats.map(([k]) => k),
       datasets: [{
-        data: sortedCats.map(([, v]) => +v.toFixed(2)),
-        backgroundColor: sortedCats.map((_, i) => palette[i % palette.length]),
-        borderWidth: 2,
-        borderColor: '#fff',
+        data: sortedCats.map(([,v]) => +v.toFixed(2)),
+        backgroundColor: sortedCats.map((_,i) => palette[i % palette.length]),
+        borderWidth: 2, borderColor: '#fff',
       }]
     },
     options: {
-      responsive: true,
-      cutout: '60%',
+      responsive: true, cutout: '60%',
+      animation: { duration: 600 },
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { boxWidth: 12, padding: 12, font: { size: 11 } }
-        },
+        legend: { position:'bottom', labels:{ boxWidth:12, padding:12, font:{size:11} } },
         tooltip: {
           callbacks: {
-            label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} (${((ctx.raw / allRows.reduce((s,r)=>s+r.amount,0))*100).toFixed(1)}%)`
+            label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} (${((ctx.raw/allRows.reduce((s,r)=>s+r.amount,0))*100).toFixed(1)}%)`
           }
         }
       }
@@ -727,15 +707,13 @@ function filterTable() {
   currentPage = 1;
   renderTable();
 }
-
 function renderTable() {
-  const start  = (currentPage - 1) * PAGE_SIZE;
-  const page   = filtered.slice(start, start + PAGE_SIZE);
-  const tbody  = document.getElementById('table-body');
-  const total  = filtered.length;
-  const pages  = Math.ceil(total / PAGE_SIZE);
+  const start = (currentPage-1) * PAGE_SIZE;
+  const page  = filtered.slice(start, start+PAGE_SIZE);
+  const total = filtered.length;
+  const pages = Math.ceil(total / PAGE_SIZE);
 
-  tbody.innerHTML = page.map(r => `
+  document.getElementById('table-body').innerHTML = page.map(r => `
     <tr>
       <td>${r.date || '—'}</td>
       <td>${escHtml(r.name)}</td>
@@ -745,72 +723,343 @@ function renderTable() {
   `).join('');
 
   document.getElementById('page-info').textContent =
-    `Showing ${Math.min(start + 1, total)}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
+    `Showing ${Math.min(start+1,total)}–${Math.min(start+PAGE_SIZE,total)} of ${total}`;
   document.getElementById('table-meta').textContent = `${total} records`;
 
-  // Pagination buttons
   const btns = document.getElementById('pagination-btns');
   btns.innerHTML = '';
-  const addBtn = (label, page, disabled, active) => {
+  const addBtn = (label, pg, disabled, active) => {
     const b = document.createElement('button');
     b.className = 'page-btn' + (active ? ' active' : '');
-    b.textContent = label;
-    b.disabled = disabled;
-    b.onclick = () => { currentPage = page; renderTable(); };
+    b.textContent = label; b.disabled = disabled;
+    b.onclick = () => { currentPage = pg; renderTable(); };
     btns.appendChild(b);
   };
-
-  addBtn('← Prev', currentPage - 1, currentPage === 1, false);
-  const range = pageRange(currentPage, pages);
+  addBtn('← Prev', currentPage-1, currentPage===1, false);
   let prev = null;
-  for (const p of range) {
-    if (prev !== null && p - prev > 1) {
-      const dots = document.createElement('span');
-      dots.textContent = '…'; dots.style.padding = '0 6px'; dots.style.color = 'var(--muted)';
-      btns.appendChild(dots);
+  for (const p of pageRange(currentPage, pages)) {
+    if (prev !== null && p-prev > 1) {
+      const d = document.createElement('span');
+      d.textContent = '…'; d.style.cssText = 'padding:0 6px;color:var(--muted)';
+      btns.appendChild(d);
     }
-    addBtn(p, p, false, p === currentPage);
+    addBtn(p, p, false, p===currentPage);
     prev = p;
   }
-  addBtn('Next →', currentPage + 1, currentPage === pages || pages === 0, false);
+  addBtn('Next →', currentPage+1, currentPage===pages||pages===0, false);
+}
+function pageRange(cur, total) {
+  if (total <= 7) return Array.from({length:total}, (_,i) => i+1);
+  const pages = new Set([1, total, cur]);
+  for (let d=-2; d<=2; d++) { const p=cur+d; if(p>=1&&p<=total) pages.add(p); }
+  return [...pages].sort((a,b)=>a-b);
 }
 
-function pageRange(cur, total) {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const pages = new Set([1, total, cur]);
-  for (let d = -2; d <= 2; d++) { const p = cur + d; if (p >= 1 && p <= total) pages.add(p); }
-  return [...pages].sort((a, b) => a - b);
+/* ═══════════════════════════════════════════════════
+   PDF REPORT GENERATION
+═══════════════════════════════════════════════════ */
+async function downloadReport() {
+  const btn = document.getElementById('download-btn');
+  btn.disabled = true;
+  document.getElementById('pdf-overlay').classList.add('show');
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const PW = 210, PH = 297; // A4 mm
+    const ML = 15, MR = 15, MT = 15;
+    const CW = PW - ML - MR;
+
+    // Collect stats from DOM
+    const statTotal   = document.getElementById('stat-total').textContent;
+    const statCount   = document.getElementById('stat-count').textContent;
+    const statLargest = document.getElementById('stat-largest').textContent;
+    const statLargestName = document.getElementById('stat-largest-name').textContent;
+    const statAvg     = document.getElementById('stat-avg').textContent;
+    const statTopCat  = document.getElementById('stat-top-cat').textContent;
+    const statTopAmt  = document.getElementById('stat-top-amount').textContent;
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    const timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+    /* ── PAGE 1 ─────────────────────────────────── */
+    // Header bar
+    doc.setFillColor(79, 70, 229);
+    doc.rect(0, 0, PW, 28, 'F');
+
+    // Logo placeholder (rounded rect)
+    doc.setFillColor(255,255,255,0.25);
+    doc.roundedRect(ML, 6, 16, 16, 3, 3, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','bold');
+    doc.text('EL', ML+8, 16, { align:'center' });
+
+    // Title
+    doc.setFontSize(16);
+    doc.setFont('helvetica','bold');
+    doc.text('ExpenseLens', ML+20, 13);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','normal');
+    doc.text('Business Expense Report', ML+20, 19);
+
+    // Date top-right
+    doc.setFontSize(8);
+    doc.text(`Generated: ${dateStr} at ${timeStr}`, PW-MR, 13, { align:'right' });
+    doc.text(`${statCount}`, PW-MR, 19, { align:'right' });
+
+    let y = 36;
+
+    // ── Summary section title
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text('EXPENSE SUMMARY', ML, y);
+    doc.setDrawColor(226,232,240);
+    doc.setLineWidth(0.3);
+    doc.line(ML, y+2, PW-MR, y+2);
+    y += 8;
+
+    // Stat cards (2x2 grid)
+    const cards = [
+      { label:'Total Expenses',  value: statTotal,   sub: statCount,       color:[79,70,229] },
+      { label:'Largest Expense', value: statLargest,  sub: statLargestName, color:[239,68,68] },
+      { label:'Average Expense', value: statAvg,      sub: 'per transaction',color:[16,185,129] },
+      { label:'Top Category',    value: statTopCat,   sub: statTopAmt,      color:[245,158,11] },
+    ];
+    const cardW = (CW - 6) / 2;
+    const cardH = 22;
+    cards.forEach((c, i) => {
+      const cx = ML + (i % 2) * (cardW + 6);
+      const cy = y + Math.floor(i / 2) * (cardH + 6);
+      // Card background
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(cx, cy, cardW, cardH, 3, 3, 'F');
+      // Accent bar
+      doc.setFillColor(...c.color);
+      doc.roundedRect(cx, cy, 3, cardH, 1.5, 1.5, 'F');
+      // Label
+      doc.setTextColor(100,116,139);
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica','bold');
+      doc.text(c.label.toUpperCase(), cx+7, cy+6);
+      // Value
+      doc.setTextColor(30,41,59);
+      doc.setFontSize(12);
+      doc.setFont('helvetica','bold');
+      doc.text(c.value, cx+7, cy+13);
+      // Sub
+      doc.setTextColor(100,116,139);
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica','normal');
+      doc.text(c.sub, cx+7, cy+19);
+    });
+    y += 2 * (cardH + 6) + 10;
+
+    // ── Monthly Bar Chart
+    doc.setTextColor(30,41,59);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text('MONTHLY SPENDING', ML, y);
+    doc.setDrawColor(226,232,240);
+    doc.line(ML, y+2, PW-MR, y+2);
+    y += 6;
+
+    const barCanvas = document.getElementById('barChart');
+    const barImg = await html2canvas(barCanvas, { scale:2, backgroundColor:'#ffffff', useCORS:true });
+    const barData = barImg.toDataURL('image/png');
+    const barAspect = barCanvas.width / barCanvas.height;
+    const barW = CW, barH = barW / barAspect;
+    doc.addImage(barData, 'PNG', ML, y, barW, Math.min(barH, 65));
+    y += Math.min(barH, 65) + 10;
+
+    // ── Category Donut Chart (if space, else new page)
+    if (y + 80 > PH - 20) { doc.addPage(); y = MT; }
+
+    doc.setTextColor(30,41,59);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text('CATEGORY BREAKDOWN', ML, y);
+    doc.setDrawColor(226,232,240);
+    doc.line(ML, y+2, PW-MR, y+2);
+    y += 6;
+
+    const donutCanvas = document.getElementById('donutChart');
+    const donutImg = await html2canvas(donutCanvas, { scale:2, backgroundColor:'#ffffff', useCORS:true });
+    const donutData = donutImg.toDataURL('image/png');
+    const donutAspect = donutCanvas.width / donutCanvas.height;
+    const donutW = CW * 0.55, donutH = donutW / donutAspect;
+    doc.addImage(donutData, 'PNG', ML + (CW - donutW)/2, y, donutW, Math.min(donutH, 80));
+    y += Math.min(donutH, 80) + 10;
+
+    /* ── PAGE 2+ — Transactions Table ─────────── */
+    doc.addPage();
+    y = MT;
+
+    // Page header accent
+    doc.setFillColor(79,70,229);
+    doc.rect(0, 0, PW, 6, 'F');
+    y = 14;
+
+    doc.setTextColor(30,41,59);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text('ALL TRANSACTIONS', ML, y);
+    doc.setTextColor(100,116,139);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica','normal');
+    doc.text(`${allRows.length} records`, PW-MR, y, { align:'right' });
+    doc.setDrawColor(226,232,240);
+    doc.setLineWidth(0.3);
+    doc.line(ML, y+2, PW-MR, y+2);
+    y += 8;
+
+    // Table header
+    const cols = [
+      { label:'Date',         w:28,  align:'left'  },
+      { label:'Description',  w:72,  align:'left'  },
+      { label:'Category',     w:45,  align:'left'  },
+      { label:'Amount',       w:30,  align:'right' },
+    ];
+    const totalColW = cols.reduce((s,c) => s+c.w, 0);
+    const tableX    = ML + (CW - totalColW) / 2;
+    const ROW_H     = 7;
+
+    const drawTableHeader = (yPos) => {
+      doc.setFillColor(241,245,249);
+      doc.rect(tableX, yPos-4, totalColW, ROW_H, 'F');
+      let x = tableX;
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica','bold');
+      doc.setTextColor(100,116,139);
+      for (const col of cols) {
+        const tx = col.align === 'right' ? x+col.w-2 : x+2;
+        doc.text(col.label.toUpperCase(), tx, yPos, { align: col.align === 'right' ? 'right' : 'left' });
+        x += col.w;
+      }
+      doc.setDrawColor(226,232,240);
+      doc.setLineWidth(0.25);
+      doc.line(tableX, yPos+2, tableX+totalColW, yPos+2);
+    };
+
+    drawTableHeader(y);
+    y += ROW_H;
+
+    const palette = ['#4f46e5','#7c3aed','#db2777','#dc2626','#d97706','#65a30d','#0891b2','#0284c7','#84cc16','#f97316'];
+    const catColors = {};
+    let colorIdx = 0;
+    for (const r of allRows) {
+      if (!catColors[r.category]) catColors[r.category] = palette[(colorIdx++) % palette.length];
+    }
+
+    const hexToRgb = (hex) => {
+      const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return res ? [parseInt(res[1],16), parseInt(res[2],16), parseInt(res[3],16)] : [79,70,229];
+    };
+
+    let rowIdx = 0;
+    for (const r of allRows) {
+      if (y + ROW_H > PH - 16) {
+        // Page footer
+        doc.setFontSize(6.5); doc.setTextColor(180,180,180);
+        doc.text(`ExpenseLens Report  •  Page ${doc.internal.getCurrentPageInfo().pageNumber}`, PW/2, PH-8, { align:'center' });
+        doc.addPage();
+        doc.setFillColor(79,70,229);
+        doc.rect(0, 0, PW, 6, 'F');
+        y = 14;
+        drawTableHeader(y);
+        y += ROW_H;
+        rowIdx = 0;
+      }
+
+      // Alternating row background
+      if (rowIdx % 2 === 0) {
+        doc.setFillColor(249,250,251);
+        doc.rect(tableX, y-4, totalColW, ROW_H, 'F');
+      }
+
+      let x = tableX;
+      doc.setFontSize(7);
+      doc.setFont('helvetica','normal');
+      doc.setTextColor(30,41,59);
+
+      // Date
+      doc.text(r.date || '—', x+2, y);
+      x += cols[0].w;
+
+      // Description (truncate)
+      const maxNameChars = 42;
+      const nameText = r.name.length > maxNameChars ? r.name.slice(0,maxNameChars)+'…' : r.name;
+      doc.text(nameText, x+2, y);
+      x += cols[1].w;
+
+      // Category chip
+      const catColor = hexToRgb(catColors[r.category] || '#4f46e5');
+      doc.setFillColor(catColor[0], catColor[1], catColor[2], 0.12);
+      const chipW = Math.min(cols[2].w - 4, doc.getStringUnitWidth(r.category) * 7 / doc.internal.scaleFactor + 6);
+      doc.roundedRect(x+2, y-3.5, chipW, 5, 1.5, 1.5, 'F');
+      doc.setTextColor(catColor[0], catColor[1], catColor[2]);
+      doc.setFontSize(6.2);
+      doc.text(r.category.length > 16 ? r.category.slice(0,16)+'…' : r.category, x+4, y);
+      x += cols[2].w;
+
+      // Amount
+      doc.setFontSize(7);
+      doc.setFont('helvetica','bold');
+      doc.setTextColor(220, 38, 38);
+      doc.text(fmt(r.amount), x+cols[3].w-2, y, { align:'right' });
+
+      // Row separator
+      doc.setDrawColor(241,245,249);
+      doc.setLineWidth(0.2);
+      doc.line(tableX, y+2.5, tableX+totalColW, y+2.5);
+
+      y += ROW_H;
+      rowIdx++;
+    }
+
+    // Last page footer
+    doc.setFontSize(6.5);
+    doc.setTextColor(180,180,180);
+    doc.text(`ExpenseLens Report  •  Page ${doc.internal.getCurrentPageInfo().pageNumber}`, PW/2, PH-8, { align:'center' });
+
+    // Save
+    doc.save(`ExpenseLens-Report-${now.toISOString().slice(0,10)}.pdf`);
+  } catch (err) {
+    console.error(err);
+    alert('PDF generation failed: ' + err.message);
+  } finally {
+    document.getElementById('pdf-overlay').classList.remove('show');
+    btn.disabled = false;
+  }
 }
 
 /* ═══════════════════════════════════════════════════
    HELPERS
 ═══════════════════════════════════════════════════ */
 function fmt(n) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n);
+  return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2 }).format(n);
 }
-
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function showLoader() {
   document.getElementById('upload-section').style.display = 'none';
-  document.getElementById('loader').style.display = 'block';
+  document.getElementById('loader').style.display         = 'block';
 }
-function hideLoader() {
-  document.getElementById('loader').style.display = 'none';
-}
-
+function hideLoader() { document.getElementById('loader').style.display = 'none'; }
 function resetApp() {
   allRows = []; filtered = []; rawHeaders = []; rawData = [];
   currentPage = 1;
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('upload-section').style.display = '';
-  document.getElementById('column-map-banner').style.display = 'none';
-  document.getElementById('reset-btn').style.display = 'none';
-  document.getElementById('file-input').value = '';
-  document.getElementById('search-input').value = '';
-  if (barChartInst) { barChartInst.destroy(); barChartInst = null; }
+  document.getElementById('dashboard').style.display          = 'none';
+  document.getElementById('upload-section').style.display     = '';
+  document.getElementById('column-map-banner').style.display  = 'none';
+  document.getElementById('reset-btn').style.display          = 'none';
+  document.getElementById('download-btn').style.display       = 'none';
+  document.getElementById('file-input').value                 = '';
+  document.getElementById('search-input').value               = '';
+  if (barChartInst)   { barChartInst.destroy();   barChartInst   = null; }
   if (donutChartInst) { donutChartInst.destroy(); donutChartInst = null; }
 }
 </script>
