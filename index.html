@@ -8,6 +8,7 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -552,9 +553,196 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
   .btn-pro .btn-label{display:none}
   #upload-section{padding:48px 20px}
 }
+
+/* ══════════════════════════════════════
+   AUTH SCREEN
+══════════════════════════════════════ */
+#auth-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);padding:24px;
+  background-image:radial-gradient(ellipse at 20% 50%,rgba(91,80,232,.07) 0%,transparent 50%),
+                   radial-gradient(ellipse at 80% 20%,rgba(139,92,246,.07) 0%,transparent 50%);
+}
+.auth-card{
+  background:var(--surface);border-radius:24px;padding:44px 40px;
+  max-width:420px;width:100%;box-shadow:var(--shadow-lg);
+  border:1px solid var(--border-light);
+  animation:slideUp .35s ease;
+}
+.auth-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:32px}
+.auth-logo-icon{
+  width:44px;height:44px;background:linear-gradient(135deg,var(--primary),#8b5cf6);
+  border-radius:13px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(91,80,232,.3);
+}
+.auth-logo-icon svg{width:24px;height:24px;fill:#fff}
+.auth-logo-text{font-size:1.3rem;font-weight:800;color:var(--text);letter-spacing:-.03em}
+
+.auth-tabs{display:flex;background:var(--bg2);border-radius:11px;padding:4px;margin-bottom:28px;border:1px solid var(--border)}
+.auth-tab{
+  flex:1;padding:9px;border-radius:8px;border:none;background:transparent;
+  font-size:.88rem;font-weight:600;color:var(--muted);cursor:pointer;
+  transition:all .2s;font-family:inherit;
+}
+.auth-tab.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow)}
+
+.auth-form{display:none;animation:fadeIn .25s ease}
+.auth-form.active{display:block}
+
+.auth-heading{font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.02em}
+.auth-sub{font-size:.85rem;color:var(--muted);margin-bottom:24px;line-height:1.5}
+
+.form-group{margin-bottom:16px}
+.form-label{
+  display:block;font-size:.8rem;font-weight:600;color:var(--text2);
+  margin-bottom:6px;letter-spacing:.01em;
+}
+.form-input{
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;
+  font-size:.9rem;color:var(--text);background:var(--bg);
+  font-family:inherit;outline:none;transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.form-input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(91,80,232,.1)}
+.form-input::placeholder{color:var(--muted-light)}
+.form-input.error{border-color:var(--red);background:var(--red-bg)}
+
+.auth-btn{
+  width:100%;padding:13px;border-radius:11px;border:none;
+  background:linear-gradient(135deg,var(--primary),#8b5cf6);color:#fff;
+  font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .2s;box-shadow:0 4px 14px rgba(91,80,232,.3);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:20px;
+}
+.auth-btn:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,80,232,.4)}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.auth-btn .btn-spinner{
+  width:16px;height:16px;border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;
+}
+.auth-btn.loading .btn-spinner{display:block}
+.auth-btn.loading .btn-text{opacity:.7}
+
+.auth-divider{
+  display:flex;align-items:center;gap:10px;margin:20px 0;
+  font-size:.78rem;color:var(--muted-light);
+}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.auth-error{
+  background:var(--red-bg);border:1px solid var(--red-border);border-radius:9px;
+  padding:10px 14px;font-size:.82rem;color:var(--red);margin-bottom:16px;display:none;
+}
+.auth-success{
+  background:var(--green-bg);border:1px solid var(--green-border);border-radius:9px;
+  padding:10px 14px;font-size:.82rem;color:var(--green);margin-bottom:16px;display:none;
+}
+
+.auth-footer-note{
+  text-align:center;margin-top:20px;font-size:.75rem;color:var(--muted-light);line-height:1.5;
+}
+
+/* User Avatar in header */
+.user-chip{
+  display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;
+  border-radius:99px;background:var(--bg2);border:1px solid var(--border);cursor:default;
+}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),#8b5cf6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;font-weight:800;color:#fff;flex-shrink:0;
+}
+.user-email{font-size:.78rem;font-weight:600;color:var(--text2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-logout{
+  padding:6px 12px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .15s;
+  display:flex;align-items:center;gap:5px;
+}
+.btn-logout:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.btn-logout svg{width:13px;height:13px;fill:currentColor}
+
+/* App shell hidden until auth */
+#app-shell{display:none}
 </style>
 </head>
 <body>
+
+<!-- ═══ AUTH SCREEN ═══ -->
+<div id="auth-screen">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M11 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9l-7-7zm1 1.5L18.5 9H12V3.5zM8 13h8v1.5H8V13zm0 3h6v1.5H8V16zm0-6h3v1.5H8V10z"/></svg>
+      </div>
+      <div class="auth-logo-text">ExpenseLens</div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-signup-btn" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <div class="auth-form active" id="auth-login-form">
+      <div class="auth-heading">Welcome back</div>
+      <div class="auth-sub">Sign in to your ExpenseLens account to continue analyzing your business expenses.</div>
+      <div class="auth-error" id="login-error"></div>
+      <div class="auth-success" id="login-success"></div>
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email address</label>
+        <input class="form-input" id="login-email" type="email" placeholder="you@company.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <input class="form-input" id="login-password" type="password" placeholder="Your password" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Sign In →</span>
+      </button>
+      <div class="auth-footer-note">
+        Don't have an account? <a href="#" onclick="switchAuthTab('signup');return false" style="color:var(--primary);font-weight:600;text-decoration:none">Create one free</a>
+      </div>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="auth-form" id="auth-signup-form">
+      <div class="auth-heading">Get started free</div>
+      <div class="auth-sub">Create your account to start analyzing business expenses with AI-powered insights.</div>
+      <div class="auth-error" id="signup-error"></div>
+      <div class="auth-success" id="signup-success"></div>
+      <div class="form-group">
+        <label class="form-label" for="signup-name">Full name</label>
+        <input class="form-input" id="signup-name" type="text" placeholder="Jane Smith" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-email">Email address</label>
+        <input class="form-input" id="signup-email" type="email" placeholder="you@company.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-password">Password <span style="color:var(--muted-light);font-weight:400">(min 6 characters)</span></label>
+        <input class="form-input" id="signup-password" type="password" placeholder="Create a strong password" autocomplete="new-password"
+               onkeydown="if(event.key==='Enter')doSignup()"/>
+      </div>
+      <button class="auth-btn" id="signup-btn" onclick="doSignup()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Create Account →</span>
+      </button>
+      <div class="auth-footer-note">
+        By signing up you agree to our Terms of Service.<br>
+        Already have an account? <a href="#" onclick="switchAuthTab('login');return false" style="color:var(--primary);font-weight:600;text-decoration:none">Sign in</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ APP SHELL (shown after auth) ═══ -->
+<div id="app-shell">
 
 <!-- ═══ HEADER ═══ -->
 <header>
@@ -575,6 +763,14 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
     <button class="btn btn-pro" onclick="openPricing()">
       <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       <span class="btn-label">Upgrade to Pro</span>
+    </button>
+    <div class="user-chip" id="user-chip" style="display:none">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <span class="user-email" id="user-email-display"></span>
+    </div>
+    <button class="btn-logout" id="logout-btn" style="display:none" onclick="doLogout()">
+      <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      Sign Out
     </button>
   </div>
 </header>
@@ -879,6 +1075,8 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
   <strong>ExpenseLens</strong> — Upload · Analyze · Understand your business expenses<br>
   <span style="font-size:.72rem;margin-top:4px;display:block">Your files are processed locally in your browser. Nothing is uploaded to any server.</span>
 </div>
+
+</div><!-- /#app-shell -->
 
 <!-- ═══ JAVASCRIPT ═══ -->
 <script>
@@ -1639,6 +1837,158 @@ function resetApp(){
   if(gaugeChartInst){gaugeChartInst.destroy();gaugeChartInst=null;}
   switchTab('overview',document.querySelector('.dash-tab'));
 }
+
+/* ════════════════════════════════════════════════════
+   SUPABASE AUTH
+════════════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://uiaghqwukyqirdhnipsc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_lMNBsLMdn_S3vnvI0mCZ8A__z0xVjCX';
+let supabaseClient = null;
+
+function initSupabase() {
+  try {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch(e) {
+    console.error('Supabase init error:', e);
+  }
+}
+
+/* ── Show / Hide Screens ── */
+function showApp(user) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display   = 'block';
+  // User chip
+  const email = user.email || '';
+  const name  = user.user_metadata?.full_name || email;
+  const initial = (name.trim()[0] || '?').toUpperCase();
+  document.getElementById('user-avatar').textContent        = initial;
+  document.getElementById('user-email-display').textContent = email;
+  document.getElementById('user-chip').style.display        = 'flex';
+  document.getElementById('logout-btn').style.display       = 'flex';
+}
+function showAuthScreen() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-shell').style.display   = 'none';
+  document.getElementById('user-chip').style.display   = 'none';
+  document.getElementById('logout-btn').style.display  = 'none';
+}
+
+/* ── Auth Tab Switch ── */
+function switchAuthTab(tab) {
+  document.getElementById('auth-login-form').classList.remove('active');
+  document.getElementById('auth-signup-form').classList.remove('active');
+  document.getElementById('tab-login-btn').classList.remove('active');
+  document.getElementById('tab-signup-btn').classList.remove('active');
+  if (tab === 'login') {
+    document.getElementById('auth-login-form').classList.add('active');
+    document.getElementById('tab-login-btn').classList.add('active');
+  } else {
+    document.getElementById('auth-signup-form').classList.add('active');
+    document.getElementById('tab-signup-btn').classList.add('active');
+  }
+  clearAuthMessages();
+}
+
+function clearAuthMessages() {
+  ['login-error','login-success','signup-error','signup-success'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.display = 'none'; el.textContent = '';
+  });
+  document.querySelectorAll('.form-input').forEach(i => i.classList.remove('error'));
+}
+
+function showAuthMsg(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function setBtnLoading(id, loading) {
+  const btn = document.getElementById(id);
+  btn.disabled = loading;
+  btn.classList.toggle('loading', loading);
+  btn.querySelector('.btn-text').textContent = loading
+    ? (id === 'login-btn' ? 'Signing in…' : 'Creating account…')
+    : (id === 'login-btn' ? 'Sign In →' : 'Create Account →');
+}
+
+/* ── Sign In ── */
+async function doLogin() {
+  if (!supabaseClient) return;
+  clearAuthMessages();
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email) { showAuthMsg('login-error','Please enter your email address.'); document.getElementById('login-email').classList.add('error'); return; }
+  if (!password) { showAuthMsg('login-error','Please enter your password.'); document.getElementById('login-password').classList.add('error'); return; }
+  setBtnLoading('login-btn', true);
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) { showAuthMsg('login-error', error.message); }
+    else if (data.user) { showApp(data.user); }
+  } catch(e) { showAuthMsg('login-error', 'Connection error. Please try again.'); }
+  finally { setBtnLoading('login-btn', false); }
+}
+
+/* ── Sign Up ── */
+async function doSignup() {
+  if (!supabaseClient) return;
+  clearAuthMessages();
+  const name     = document.getElementById('signup-name').value.trim();
+  const email    = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  if (!name)     { showAuthMsg('signup-error','Please enter your full name.'); document.getElementById('signup-name').classList.add('error'); return; }
+  if (!email)    { showAuthMsg('signup-error','Please enter your email address.'); document.getElementById('signup-email').classList.add('error'); return; }
+  if (password.length < 6) { showAuthMsg('signup-error','Password must be at least 6 characters.'); document.getElementById('signup-password').classList.add('error'); return; }
+  setBtnLoading('signup-btn', true);
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email, password,
+      options: { data: { full_name: name } }
+    });
+    if (error) { showAuthMsg('signup-error', error.message); }
+    else if (data.user && data.session) {
+      showApp(data.user);
+    } else {
+      showAuthMsg('signup-success', '✓ Account created! Check your email to confirm, then sign in.');
+      setTimeout(() => switchAuthTab('login'), 2000);
+    }
+  } catch(e) { showAuthMsg('signup-error', 'Connection error. Please try again.'); }
+  finally { setBtnLoading('signup-btn', false); }
+}
+
+/* ── Sign Out ── */
+async function doLogout() {
+  if (!supabaseClient) return;
+  try { await supabaseClient.auth.signOut(); } catch(e) {}
+  resetApp();
+  showAuthScreen();
+}
+
+/* ── Init on Load ── */
+(async function() {
+  initSupabase();
+  if (!supabaseClient) { showApp({ email: 'demo@expenselens.com', user_metadata:{} }); return; }
+
+  // Listen for auth state changes (handles token refresh, etc.)
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+      showApp(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      showAuthScreen();
+    }
+  });
+
+  // Check for existing session
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session && session.user) {
+      showApp(session.user);
+    } else {
+      showAuthScreen();
+    }
+  } catch(e) {
+    showAuthScreen();
+  }
+})();
 </script>
 </body>
 </html>
