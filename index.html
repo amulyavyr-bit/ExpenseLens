@@ -1,451 +1,942 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ExpenseLens — Business Expense Analyzer</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ExpenseLens — Business Expense Analyzer</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- SheetJS (xlsx) -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  <!-- html2canvas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  <style>
-    /* ─── Reset & Base ─────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root{
+  --bg:#faf8f5;
+  --bg2:#f3efe9;
+  --surface:#ffffff;
+  --surface-warm:#fdf9f5;
+  --border:#e8e2d9;
+  --border-light:#f0ebe4;
+  --primary:#5b50e8;
+  --primary-hover:#4a40d4;
+  --primary-light:#f0effe;
+  --primary-mid:#dbd8fc;
+  --text:#1c1633;
+  --text2:#3d3658;
+  --muted:#6b6280;
+  --muted-light:#9d96b0;
+  --green:#12b76a;
+  --green-bg:#ecfdf5;
+  --green-border:#a7f3d0;
+  --amber:#f79009;
+  --amber-bg:#fffbeb;
+  --amber-border:#fde68a;
+  --red:#e53935;
+  --red-bg:#fff1f0;
+  --red-border:#fecaca;
+  --gold:#f59e0b;
+  --radius:16px;
+  --radius-sm:10px;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.04),0 10px 30px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 16px rgba(0,0,0,.06),0 20px 48px rgba(0,0,0,.1);
+  --pro-gradient:linear-gradient(135deg,#f59e0b,#ef4444);
+}
 
-    :root {
-      --bg:            #f0f2f5;
-      --surface:       #ffffff;
-      --border:        #e2e8f0;
-      --primary:       #4f46e5;
-      --primary-light: #ede9fe;
-      --text:          #1e293b;
-      --muted:         #64748b;
-      --green:         #10b981;
-      --amber:         #f59e0b;
-      --red:           #ef4444;
-      --blue:          #3b82f6;
-      --radius:        12px;
-      --shadow:        0 1px 3px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.06);
-    }
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
 
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 
-    /* ─── Header ────────────────────────────────────── */
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo-icon {
-      width: 36px; height: 36px;
-      background: var(--primary);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .logo-icon svg { width: 20px; height: 20px; fill: #fff; }
-    header h1 { font-size: 1.25rem; font-weight: 700; color: var(--text); }
-    header span { font-size: .8rem; color: var(--muted); margin-left: 4px; }
-    .header-actions { display: flex; gap: 10px; align-items: center; }
+/* ═══ HEADER ═══ */
+header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 32px;height:64px;display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 0 var(--border),0 2px 8px rgba(0,0,0,.04);
+}
+.logo-wrap{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{
+  width:38px;height:38px;background:linear-gradient(135deg,var(--primary),#8b5cf6);
+  border-radius:11px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(91,80,232,.3);flex-shrink:0;
+}
+.logo-icon svg{width:20px;height:20px;fill:#fff}
+.logo-text{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.02em}
+.logo-text span{font-weight:400;color:var(--muted);font-size:.75rem;display:block;line-height:1;margin-top:1px;letter-spacing:0}
+.header-sep{flex:1}
+.header-actions{display:flex;align-items:center;gap:8px}
 
-    /* ─── Main Layout ───────────────────────────────── */
-    main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+/* ── Plan Badge ── */
+.plan-badge{
+  padding:4px 12px;border-radius:99px;font-size:.75rem;font-weight:600;
+  background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-mid);
+  cursor:default;
+}
+.plan-badge.pro-badge{
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  color:#92400e;border-color:#fcd34d;
+}
 
-    /* ─── Upload Zone ───────────────────────────────── */
-    #upload-section {
-      background: var(--surface);
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 64px 32px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-    }
-    #upload-section:hover, #upload-section.drag-over {
-      border-color: var(--primary);
-      background: var(--primary-light);
-    }
-    #upload-section .upload-icon {
-      width: 64px; height: 64px;
-      background: var(--primary-light);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-    }
-    #upload-section .upload-icon svg { width: 32px; height: 32px; fill: var(--primary); }
-    #upload-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
-    #upload-section p  { color: var(--muted); margin-bottom: 24px; font-size: .95rem; }
-    .badge-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
-    .badge {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 999px; padding: 4px 14px; font-size: .8rem; color: var(--muted);
-    }
-    #file-input { display: none; }
-    .btn-upload {
-      background: var(--primary); color: #fff;
-      border: none; border-radius: 8px;
-      padding: 12px 28px; font-size: .95rem; font-weight: 600;
-      cursor: pointer; transition: opacity .2s;
-    }
-    .btn-upload:hover { opacity: .88; }
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 18px;
+  border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;
+  border:none;transition:all .2s;white-space:nowrap;
+}
+.btn svg{width:15px;height:15px;fill:currentColor;flex-shrink:0}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px);box-shadow:0 4px 12px rgba(91,80,232,.3)}
+.btn-pro{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 2px 8px rgba(239,68,68,.25)}
+.btn-pro:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 4px 16px rgba(239,68,68,.35)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{opacity:.88;transform:translateY(-1px)}
+.btn-green:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.btn-upload-main{
+  background:var(--primary);color:#fff;border:none;border-radius:12px;
+  padding:14px 32px;font-size:1rem;font-weight:700;cursor:pointer;
+  transition:all .2s;box-shadow:0 4px 16px rgba(91,80,232,.3);
+}
+.btn-upload-main:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(91,80,232,.4)}
 
-    /* ─── Column Mapping Banner ─────────────────────── */
-    #column-map-banner {
-      display: none;
-      background: #fffbeb;
-      border: 1px solid #fcd34d;
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      font-size: .88rem;
-      color: #92400e;
-    }
-    #column-map-banner strong { display: block; margin-bottom: 8px; }
-    #column-map-banner select {
-      padding: 4px 8px; border-radius: 6px; border: 1px solid #fcd34d;
-      background: #fff; margin: 0 4px;
-    }
-    #column-map-banner label { margin-right: 16px; }
+/* ═══ MAIN LAYOUT ═══ */
+main{max-width:1180px;margin:0 auto;padding:32px 24px}
 
-    /* ─── Dashboard ─────────────────────────────────── */
-    #dashboard { display: none; }
+/* ── Section Header ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title{display:flex;align-items:center;gap:10px}
+.section-title h2{font-size:1.05rem;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.section-icon{
+  width:32px;height:32px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.section-icon svg{width:16px;height:16px}
+.si-purple{background:var(--primary-light)} .si-purple svg{fill:var(--primary)}
+.si-green{background:var(--green-bg)}       .si-green svg{fill:var(--green)}
+.si-amber{background:var(--amber-bg)}       .si-amber svg{fill:var(--amber)}
+.si-red{background:var(--red-bg)}           .si-red svg{fill:var(--red)}
 
-    /* ─── Stat Cards ────────────────────────────────── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .stat-card .label { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-    .stat-card .value { font-size: 1.75rem; font-weight: 800; color: var(--text); }
-    .stat-card .sub   { font-size: .8rem; color: var(--muted); }
-    .stat-card .icon-wrap {
-      width: 40px; height: 40px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 4px;
-    }
-    .stat-card .icon-wrap svg { width: 22px; height: 22px; }
-    .icon-total   { background: #ede9fe; } .icon-total svg   { fill: var(--primary); }
-    .icon-largest { background: #fee2e2; } .icon-largest svg { fill: var(--red); }
-    .icon-avg     { background: #d1fae5; } .icon-avg svg     { fill: var(--green); }
-    .icon-top     { background: #fef3c7; } .icon-top svg     { fill: var(--amber); }
+/* ── Pro Lock Badge on sections ── */
+.pro-lock-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:99px;font-size:.72rem;font-weight:700;
+  background:var(--pro-gradient);color:#fff;letter-spacing:.02em;
+}
+.pro-lock-badge::before{content:'⭐';font-size:.7rem}
 
-    /* ─── Charts Row ────────────────────────────────── */
-    .charts-row {
-      display: grid;
-      grid-template-columns: 3fr 2fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
-    .chart-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
-    }
-    .chart-card h3 { font-size: .9rem; font-weight: 700; color: var(--muted); margin-bottom: 20px; text-transform: uppercase; letter-spacing: .04em; }
-    .chart-wrap { position: relative; }
-    #barChart   { max-height: 280px; }
-    #donutChart { max-height: 260px; }
+/* ═══ UPLOAD SECTION ═══ */
+#upload-section{
+  background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);
+  padding:72px 32px;text-align:center;cursor:pointer;
+  transition:border-color .25s,background .25s,transform .25s;
+  position:relative;overflow:hidden;
+}
+#upload-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% -20%,rgba(91,80,232,.06),transparent 60%);
+  pointer-events:none;
+}
+#upload-section:hover,#upload-section.drag-over{
+  border-color:var(--primary);background:var(--primary-light);
+}
+#upload-section.drag-over{transform:scale(1.01)}
+.upload-icon-ring{
+  width:72px;height:72px;background:var(--primary-light);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 22px;
+  border:3px solid var(--primary-mid);
+}
+.upload-icon-ring svg{width:34px;height:34px;fill:var(--primary)}
+#upload-section h2{font-size:1.5rem;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}
+#upload-section .sub-text{color:var(--muted);margin-bottom:28px;font-size:.95rem}
+.file-type-badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.file-badge{
+  background:var(--surface-warm);border:1px solid var(--border);
+  border-radius:99px;padding:5px 16px;font-size:.8rem;color:var(--muted);font-weight:500;
+}
+#file-input{display:none}
+.upload-hint{margin-top:14px;font-size:.78rem;color:var(--muted-light)}
 
-    /* ─── Transactions Table ────────────────────────── */
-    .table-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-    .table-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-    }
-    .table-header h3 { font-size: .9rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-    .table-meta { font-size: .82rem; color: var(--muted); }
-    #search-input {
-      border: 1px solid var(--border); border-radius: 8px;
-      padding: 7px 12px; font-size: .85rem; width: 220px; outline: none;
-      transition: border-color .2s;
-    }
-    #search-input:focus { border-color: var(--primary); }
-    .table-controls { display: flex; gap: 10px; align-items: center; }
-    table { width: 100%; border-collapse: collapse; }
-    thead th {
-      text-align: left; padding: 12px 20px;
-      font-size: .78rem; font-weight: 600; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .04em;
-      background: var(--bg); border-bottom: 1px solid var(--border);
-    }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #f8fafc; }
-    tbody td { padding: 14px 20px; font-size: .9rem; }
-    .category-chip {
-      display: inline-block; padding: 3px 10px;
-      border-radius: 999px; font-size: .75rem; font-weight: 600;
-      background: var(--primary-light); color: var(--primary);
-    }
-    .amount-cell { font-weight: 700; }
-    .amount-pos  { color: var(--red); }
+/* Multi-file note */
+.multi-hint{
+  margin-top:10px;font-size:.78rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.multi-hint .pro-chip{
+  background:var(--pro-gradient);color:#fff;
+  font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:99px;
+}
 
-    /* ─── Pagination ─────────────────────────────────── */
-    .pagination {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 20px; border-top: 1px solid var(--border);
-      font-size: .84rem; color: var(--muted);
-    }
-    .pagination-btns { display: flex; gap: 6px; }
-    .page-btn {
-      border: 1px solid var(--border); background: var(--surface);
-      border-radius: 6px; padding: 5px 12px; cursor: pointer; font-size: .82rem;
-      transition: background .15s, border-color .15s;
-    }
-    .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-    .page-btn:disabled  { opacity: .45; cursor: default; }
-    .page-btn.active    { background: var(--primary); color: #fff; border-color: var(--primary); }
+/* ── Column Map Banner ── */
+#column-map-banner{
+  display:none;background:var(--amber-bg);border:1px solid var(--amber-border);
+  border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;
+  font-size:.875rem;color:#78350f;
+}
+#column-map-banner strong{display:block;margin-bottom:12px;font-size:.9rem}
+#column-map-banner select{
+  padding:5px 10px;border-radius:8px;border:1px solid var(--amber-border);
+  background:#fff;margin:0 4px;font-size:.85rem;color:var(--text);
+}
+#column-map-banner label{margin-right:20px;display:inline-flex;align-items:center;gap:6px}
+#column-map-banner .map-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px}
 
-    /* ─── Footer ─────────────────────────────────────── */
-    .footer { text-align: center; padding: 24px; font-size: .8rem; color: var(--muted); }
+/* ── Loader ── */
+#loader{display:none;text-align:center;padding:72px;color:var(--muted)}
+.spinner{
+  width:44px;height:44px;border:4px solid var(--border);
+  border-top-color:var(--primary);border-radius:50%;
+  animation:spin .7s linear infinite;margin:0 auto 18px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-weight:600;font-size:.95rem;margin-bottom:4px}
+.loader-sub{font-size:.8rem;color:var(--muted-light)}
 
-    /* ─── Loader ─────────────────────────────────────── */
-    #loader { display: none; text-align: center; padding: 48px; color: var(--muted); }
-    .spinner {
-      width: 40px; height: 40px; border: 4px solid var(--border);
-      border-top-color: var(--primary); border-radius: 50%;
-      animation: spin .7s linear infinite; margin: 0 auto 16px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+/* ═══ DASHBOARD ═══ */
+#dashboard{display:none;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-    /* ─── Buttons ───────────────────────────────────── */
-    .btn-reset {
-      background: transparent; border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 18px; font-size: .85rem;
-      cursor: pointer; color: var(--muted); transition: all .2s;
-    }
-    .btn-reset:hover { border-color: var(--red); color: var(--red); }
+/* ── Dashboard Tabs ── */
+.dash-tabs{
+  display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:4px;margin-bottom:28px;width:fit-content;
+}
+.dash-tab{
+  padding:8px 18px;border-radius:9px;font-size:.85rem;font-weight:600;
+  cursor:pointer;border:none;background:transparent;color:var(--muted);
+  transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.dash-tab:hover{color:var(--text)}
+.dash-tab.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow)}
+.dash-tab .tab-pro{
+  font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:4px;
+  background:var(--pro-gradient);color:#fff;
+}
 
-    .btn-download {
-      background: #10b981; color: #fff;
-      border: none; border-radius: 8px;
-      padding: 8px 18px; font-size: .85rem; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; gap: 7px;
-      transition: opacity .2s;
-    }
-    .btn-download:hover  { opacity: .88; }
-    .btn-download:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-download svg { width: 16px; height: 16px; fill: #fff; flex-shrink: 0; }
+/* ── Tab Panels ── */
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .3s ease}
 
-    /* ─── PDF Overlay ────────────────────────────────── */
-    #pdf-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(15,23,42,.55); backdrop-filter: blur(4px);
-      z-index: 9999; align-items: center; justify-content: center;
-    }
-    #pdf-overlay.show { display: flex; }
-    .pdf-toast {
-      background: #fff; border-radius: 14px; padding: 32px 40px;
-      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.18);
-      min-width: 260px;
-    }
-    .pdf-toast .spinner { margin-bottom: 12px; }
-    .pdf-toast p { font-weight: 600; font-size: 1rem; color: var(--text); margin-bottom: 4px; }
-    .pdf-toast small { color: var(--muted); font-size: .82rem; }
-  </style>
+/* ═══ STAT CARDS ═══ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{
+  background:var(--surface);border-radius:var(--radius);padding:22px 24px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  display:flex;flex-direction:column;gap:6px;
+  transition:transform .2s,box-shadow .2s;
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-card .s-label{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat-card .s-value{font-size:1.8rem;font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1}
+.stat-card .s-sub{font-size:.78rem;color:var(--muted-light);font-weight:500}
+.stat-card .s-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:6px;
+}
+.stat-card .s-icon svg{width:20px;height:20px}
+.ic-indigo{background:var(--primary-light)} .ic-indigo svg{fill:var(--primary)}
+.ic-red{background:var(--red-bg)}           .ic-red svg{fill:var(--red)}
+.ic-green{background:var(--green-bg)}       .ic-green svg{fill:var(--green)}
+.ic-amber{background:var(--amber-bg)}       .ic-amber svg{fill:var(--amber)}
+
+/* ═══ CHARTS ═══ */
+.charts-row{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-bottom:24px}
+@media(max-width:768px){.charts-row{grid-template-columns:1fr}}
+.chart-card{
+  background:var(--surface);border-radius:var(--radius);padding:24px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+}
+.chart-title{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:18px}
+#barChart{max-height:280px}
+#donutChart{max-height:260px}
+
+/* ═══ TRANSACTIONS TABLE ═══ */
+.table-card{
+  background:var(--surface);border-radius:var(--radius);
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  overflow:hidden;margin-bottom:24px;
+}
+.table-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid var(--border);
+}
+.table-header-left{display:flex;align-items:center;gap:10px}
+.table-header h3{font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.table-controls{display:flex;gap:8px;align-items:center}
+#search-input{
+  border:1px solid var(--border);border-radius:9px;
+  padding:8px 14px;font-size:.85rem;width:220px;outline:none;
+  background:var(--bg);color:var(--text);font-family:inherit;
+  transition:border-color .2s,background .2s;
+}
+#search-input:focus{border-color:var(--primary);background:#fff}
+.table-meta{font-size:.78rem;color:var(--muted-light);white-space:nowrap}
+table{width:100%;border-collapse:collapse}
+thead th{
+  text-align:left;padding:11px 20px;
+  font-size:.72rem;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;
+  background:var(--bg);border-bottom:1px solid var(--border);
+}
+tbody tr{border-bottom:1px solid var(--border-light);transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--primary-light)}
+tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
+.cat-chip{
+  display:inline-block;padding:3px 10px;border-radius:99px;
+  font-size:.72rem;font-weight:700;
+  background:var(--primary-light);color:var(--primary);
+}
+.amt-cell{font-weight:700;color:var(--red)}
+.pagination{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;border-top:1px solid var(--border);
+  font-size:.8rem;color:var(--muted);
+}
+.pagination-btns{display:flex;gap:4px}
+.page-btn{
+  border:1px solid var(--border);background:var(--surface);
+  border-radius:7px;padding:5px 11px;cursor:pointer;font-size:.78rem;
+  transition:all .15s;color:var(--muted);font-family:inherit;
+}
+.page-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.page-btn:disabled{opacity:.4;cursor:default}
+.page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ═══ AI INSIGHTS ═══ */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:24px}
+.insight-card{
+  background:var(--surface);border-radius:var(--radius);padding:22px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+}
+.insight-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.insight-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--primary);
+}
+.insight-card.warn::before{background:var(--amber)}
+.insight-card.danger::before{background:var(--red)}
+.insight-card.success::before{background:var(--green)}
+.insight-emoji{font-size:1.5rem;margin-bottom:10px;display:block}
+.insight-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.insight-body{font-size:.82rem;color:var(--muted);line-height:1.55}
+.insight-highlight{
+  display:inline-block;margin-top:10px;padding:4px 10px;
+  border-radius:7px;font-size:.78rem;font-weight:600;
+}
+.insight-highlight.good{background:var(--green-bg);color:var(--green)}
+.insight-highlight.warn{background:var(--amber-bg);color:var(--amber)}
+.insight-highlight.bad{background:var(--red-bg);color:var(--red)}
+
+/* ── Pro Lock Overlay ── */
+.pro-locked{position:relative}
+.pro-overlay{
+  position:absolute;inset:0;background:rgba(250,248,245,.88);
+  backdrop-filter:blur(4px);border-radius:var(--radius);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;z-index:5;text-align:center;padding:20px;
+}
+.pro-overlay-icon{font-size:2rem}
+.pro-overlay h4{font-size:.95rem;font-weight:700;color:var(--text)}
+.pro-overlay p{font-size:.8rem;color:var(--muted);max-width:220px}
+
+/* ═══ HEALTH SCORE ═══ */
+.health-row{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:24px}
+@media(max-width:700px){.health-row{grid-template-columns:1fr}}
+.health-score-card{
+  background:var(--surface);border-radius:var(--radius);padding:28px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+}
+.gauge-wrap{position:relative;width:150px;height:150px}
+.gauge-wrap canvas{position:absolute;inset:0}
+.gauge-inner{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.gauge-score{font-size:2.4rem;font-weight:900;letter-spacing:-.04em}
+.gauge-max{font-size:.75rem;color:var(--muted);font-weight:600}
+.health-label{font-size:1rem;font-weight:700;color:var(--text)}
+.health-status{
+  padding:5px 14px;border-radius:99px;font-size:.78rem;font-weight:700;
+}
+.hs-good{background:var(--green-bg);color:var(--green)}
+.hs-warn{background:var(--amber-bg);color:var(--amber)}
+.hs-bad{background:var(--red-bg);color:var(--red)}
+
+.health-factors-card{
+  background:var(--surface);border-radius:var(--radius);padding:24px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+}
+.health-factors-title{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:18px}
+.factor-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.factor-row:last-child{margin-bottom:0}
+.factor-icon{font-size:1.2rem;width:32px;text-align:center;flex-shrink:0}
+.factor-info{flex:1}
+.factor-name{font-size:.85rem;font-weight:600;color:var(--text)}
+.factor-desc{font-size:.75rem;color:var(--muted);margin-top:2px}
+.factor-bar-wrap{width:90px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;flex-shrink:0}
+.factor-bar{height:100%;border-radius:3px;transition:width .8s ease}
+.fb-green{background:var(--green)}
+.fb-amber{background:var(--amber)}
+.fb-red{background:var(--red)}
+.factor-score{font-size:.8rem;font-weight:700;width:32px;text-align:right;color:var(--text2);flex-shrink:0}
+
+/* ═══ FORECASTING ═══ */
+.forecast-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:24px}
+.forecast-card{
+  background:var(--surface);border-radius:var(--radius);padding:22px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;
+}
+.forecast-card.highlight{
+  background:linear-gradient(135deg,var(--primary),#8b5cf6);
+  border-color:transparent;
+}
+.forecast-card.highlight *{color:#fff!important}
+.forecast-card.highlight .forecast-icon{background:rgba(255,255,255,.2)}
+.forecast-icon{
+  width:40px;height:40px;border-radius:10px;background:var(--primary-light);
+  display:flex;align-items:center;justify-content:center;margin-bottom:8px;
+}
+.forecast-icon svg{width:20px;height:20px;fill:var(--primary)}
+.forecast-label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.forecast-value{font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-.03em}
+.forecast-sub{font-size:.78rem;color:var(--muted)}
+.forecast-trend{
+  display:inline-flex;align-items:center;gap:4px;margin-top:6px;
+  font-size:.78rem;font-weight:600;padding:3px 8px;border-radius:6px;
+}
+.trend-up{background:var(--red-bg);color:var(--red)}
+.trend-down{background:var(--green-bg);color:var(--green)}
+.trend-flat{background:var(--amber-bg);color:var(--amber)}
+
+/* ═══ MULTI-FILE COMPARISON ═══ */
+#multi-panel{margin-bottom:24px}
+.multi-upload-area{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;
+}
+@media(max-width:600px){.multi-upload-area{grid-template-columns:1fr}}
+.file-slot{
+  background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);
+  padding:32px 20px;text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.file-slot:hover,.file-slot.loaded{border-color:var(--primary);background:var(--primary-light)}
+.file-slot.loaded{cursor:default}
+.slot-icon{font-size:2rem;margin-bottom:8px}
+.slot-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.slot-sub{font-size:.78rem;color:var(--muted)}
+.slot-loaded-name{font-size:.82rem;font-weight:600;color:var(--primary);margin-top:6px}
+
+.comparison-card{
+  background:var(--surface);border-radius:var(--radius);padding:24px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:14px;
+}
+.comparison-title{font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px}
+.comp-stat-row{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:12px}
+.comp-stat{text-align:center}
+.comp-stat-label{font-size:.72rem;color:var(--muted);font-weight:500;margin-bottom:2px}
+.comp-stat-val{font-size:1.1rem;font-weight:800;color:var(--text)}
+.comp-stat-fname{font-size:.68rem;color:var(--muted-light);margin-top:2px}
+.comp-divider{font-size:1.2rem;color:var(--border);text-align:center}
+.comp-change{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:99px;font-size:.78rem;font-weight:700;margin-top:6px;
+}
+.cc-up{background:var(--red-bg);color:var(--red)}
+.cc-down{background:var(--green-bg);color:var(--green)}
+
+/* ═══ PRICING MODAL ═══ */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;background:rgba(28,22,51,.6);
+  backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;
+  padding:24px;
+}
+.modal-backdrop.open{display:flex;animation:fadeIn .2s ease}
+.pricing-modal{
+  background:var(--surface);border-radius:24px;padding:40px;
+  max-width:760px;width:100%;box-shadow:var(--shadow-lg);
+  border:1px solid var(--border-light);position:relative;
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-close{
+  position:absolute;top:18px;right:18px;
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--border);
+  background:var(--bg);cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);
+  transition:all .15s;
+}
+.modal-close:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.modal-header{text-align:center;margin-bottom:32px}
+.modal-header h2{font-size:1.6rem;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
+.modal-header p{font-size:.9rem;color:var(--muted)}
+.plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:520px){.plans-grid{grid-template-columns:1fr}}
+.plan-card{
+  border:2px solid var(--border);border-radius:18px;padding:28px;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.plan-card.recommended{
+  border-color:var(--primary);
+  background:linear-gradient(180deg,var(--primary-light) 0%,#fff 60%);
+}
+.plan-card-badge{
+  position:absolute;top:16px;right:16px;
+  background:var(--primary);color:#fff;
+  font-size:.65rem;font-weight:800;padding:3px 10px;border-radius:99px;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.plan-name{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.plan-price{font-size:2.4rem;font-weight:900;letter-spacing:-.04em;color:var(--text)}
+.plan-price span{font-size:.9rem;font-weight:500;color:var(--muted)}
+.plan-desc{font-size:.82rem;color:var(--muted);margin:10px 0 20px;line-height:1.5}
+.plan-features{list-style:none;margin-bottom:24px}
+.plan-features li{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:.83rem;color:var(--text2);padding:5px 0;
+}
+.plan-features li::before{
+  content:'✓';font-weight:800;flex-shrink:0;margin-top:1px;
+}
+.plan-card:not(.recommended) .plan-features li::before{color:var(--muted)}
+.plan-card.recommended .plan-features li::before{color:var(--primary)}
+.plan-features li.locked{color:var(--muted-light)}
+.plan-features li.locked::before{content:'—';color:var(--border)}
+.plan-btn{width:100%;padding:13px;border-radius:11px;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:inherit}
+.plan-btn-free{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.plan-btn-free:hover{border-color:var(--primary);color:var(--primary)}
+.plan-btn-pro{background:linear-gradient(135deg,var(--primary),#8b5cf6);color:#fff;box-shadow:0 4px 16px rgba(91,80,232,.3)}
+.plan-btn-pro:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,80,232,.4)}
+
+/* ── PDF Overlay ── */
+#pdf-overlay{
+  display:none;position:fixed;inset:0;background:rgba(28,22,51,.6);
+  backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;
+}
+#pdf-overlay.show{display:flex}
+.pdf-toast{
+  background:var(--surface);border-radius:18px;padding:36px 48px;
+  text-align:center;box-shadow:var(--shadow-lg);min-width:280px;
+}
+.pdf-toast p{font-weight:700;font-size:1rem;color:var(--text);margin-bottom:4px}
+.pdf-toast small{color:var(--muted);font-size:.82rem}
+
+/* ── Footer ── */
+.footer{
+  text-align:center;padding:32px 24px;font-size:.78rem;color:var(--muted-light);
+  border-top:1px solid var(--border);margin-top:16px;
+}
+.footer strong{color:var(--muted);font-weight:600}
+
+/* ── Divider ── */
+.dash-divider{height:1px;background:var(--border);margin:28px 0}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  header{padding:0 16px}
+  main{padding:20px 16px}
+  .logo-text span{display:none}
+  .btn-pro .btn-label{display:none}
+  #upload-section{padding:48px 20px}
+}
+</style>
 </head>
 <body>
 
-<!-- ─── Header ─────────────────────────────────────── -->
+<!-- ═══ HEADER ═══ -->
 <header>
-  <div class="logo-icon">
-    <svg viewBox="0 0 24 24"><path d="M11 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9l-7-7zm1 1.5L18.5 9H12V3.5zM8 13h8v1.5H8V13zm0 3h6v1.5H8V16zm0-6h3v1.5H8V10z"/></svg>
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M11 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9l-7-7zm1 1.5L18.5 9H12V3.5zM8 13h8v1.5H8V13zm0 3h6v1.5H8V16zm0-6h3v1.5H8V10z"/></svg>
+    </div>
+    <div class="logo-text">ExpenseLens<span>Business Expense Analyzer</span></div>
   </div>
-  <h1>ExpenseLens <span>Business Expense Analyzer</span></h1>
-  <div style="flex:1"></div>
+  <div class="header-sep"></div>
   <div class="header-actions">
-    <button class="btn-download" id="download-btn" style="display:none" onclick="downloadReport()">
+    <span class="plan-badge" id="plan-badge">Free Plan</span>
+    <button class="btn btn-ghost btn-sm" id="download-btn" style="display:none" onclick="downloadReport()">
       <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      Download Report
+      Export PDF
     </button>
-    <button class="btn-reset" id="reset-btn" style="display:none" onclick="resetApp()">&#8635; New File</button>
+    <button class="btn btn-ghost btn-sm btn-danger" id="reset-btn" style="display:none" onclick="resetApp()">↺ New File</button>
+    <button class="btn btn-pro" onclick="openPricing()">
+      <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span class="btn-label">Upgrade to Pro</span>
+    </button>
   </div>
 </header>
 
-<!-- ─── PDF Overlay ─────────────────────────────────── -->
-<div id="pdf-overlay">
-  <div class="pdf-toast">
-    <div class="spinner"></div>
-    <p>Generating PDF Report…</p>
-    <small>This may take a few seconds</small>
+<!-- ═══ PRICING MODAL ═══ -->
+<div class="modal-backdrop" id="pricing-modal" onclick="if(event.target===this)closePricing()">
+  <div class="pricing-modal">
+    <button class="modal-close" onclick="closePricing()">✕</button>
+    <div class="modal-header">
+      <h2>Choose your plan</h2>
+      <p>Unlock the full power of ExpenseLens with Pro — AI insights, forecasting, and more.</p>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0 <span>/ month</span></div>
+        <div class="plan-desc">Perfect for individuals and small teams getting started with expense tracking.</div>
+        <ul class="plan-features">
+          <li>Upload Excel, CSV, XLS files</li>
+          <li>Interactive dashboard &amp; charts</li>
+          <li>Basic PDF export</li>
+          <li>Transactions table with search</li>
+          <li>2 AI insights per report</li>
+          <li class="locked">Full AI financial insights</li>
+          <li class="locked">Business health score</li>
+          <li class="locked">Expense forecasting</li>
+          <li class="locked">Multi-file comparison</li>
+          <li class="locked">Report history</li>
+        </ul>
+        <button class="plan-btn plan-btn-free" onclick="closePricing()">Stay on Free</button>
+      </div>
+      <div class="plan-card recommended">
+        <div class="plan-card-badge">Most Popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$29 <span>/ month</span></div>
+        <div class="plan-desc">Everything you need to truly understand and optimize your business spending.</div>
+        <ul class="plan-features">
+          <li>Everything in Free</li>
+          <li>Unlimited file uploads</li>
+          <li>Full AI financial insights</li>
+          <li>Business health score</li>
+          <li>Expense forecasting</li>
+          <li>Multi-file comparison</li>
+          <li>Save &amp; manage report history</li>
+          <li>Advanced PDF reports</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="plan-btn plan-btn-pro" onclick="activatePro()">✦ Go Pro — Demo Unlock</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ─── Main ────────────────────────────────────────── -->
+<!-- ═══ PDF OVERLAY ═══ -->
+<div id="pdf-overlay">
+  <div class="pdf-toast">
+    <div class="spinner" style="margin:0 auto 16px"></div>
+    <p>Generating PDF Report…</p>
+    <small>Capturing charts and table…</small>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
 <main>
 
-  <!-- Upload -->
-  <div id="upload-section" onclick="document.getElementById('file-input').click()"
-       ondragover="event.preventDefault(); this.classList.add('drag-over')"
+  <!-- Upload Section -->
+  <div id="upload-section"
+       ondragover="event.preventDefault();this.classList.add('drag-over')"
        ondragleave="this.classList.remove('drag-over')"
-       ondrop="handleDrop(event)">
-    <div class="upload-icon">
+       ondrop="handleDrop(event)"
+       onclick="document.getElementById('file-input').click()">
+    <div class="upload-icon-ring">
       <svg viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0012 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 000 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
     </div>
-    <h2>Upload your expense file</h2>
-    <p>Drag and drop your file here, or click the button below to browse</p>
-    <div class="badge-row">
-      <span class="badge">📊 Excel (.xlsx)</span>
-      <span class="badge">📋 CSV</span>
-      <span class="badge">📄 XLS</span>
+    <h2>Drop your expense file here</h2>
+    <p class="sub-text">Upload and analyze your business expenses in seconds</p>
+    <div class="file-type-badges">
+      <span class="file-badge">📊 Excel .xlsx</span>
+      <span class="file-badge">📄 .xls</span>
+      <span class="file-badge">📋 CSV</span>
     </div>
-    <button class="btn-upload" onclick="event.stopPropagation(); document.getElementById('file-input').click()">
-      Choose File
-    </button>
-    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(event)" />
+    <button class="btn-upload-main" onclick="event.stopPropagation();document.getElementById('file-input').click()">Choose File to Analyze</button>
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(event)"/>
+    <p class="upload-hint">Auto-detects Date · Amount · Category · Description columns</p>
+    <p class="multi-hint">
+      <span class="pro-chip">PRO</span>
+      Multi-file comparison available on Pro plan
+    </p>
   </div>
 
-  <!-- Column Mapping Banner -->
+  <!-- Column Map Banner -->
   <div id="column-map-banner">
-    <strong>⚠️ Some columns couldn't be auto-detected. Please map them manually:</strong>
-    <div id="col-map-controls"></div>
-    <br>
-    <button class="btn-upload" style="padding:8px 20px;font-size:.85rem" onclick="applyColumnMap()">Apply & Analyze</button>
+    <strong>⚠️ We couldn't auto-detect some columns. Please map them manually:</strong>
+    <div class="map-row" id="col-map-controls"></div>
+    <button class="btn btn-primary btn-sm" onclick="applyColumnMap()">Apply &amp; Analyze →</button>
   </div>
 
   <!-- Loader -->
   <div id="loader">
     <div class="spinner"></div>
-    <p>Analyzing your expenses…</p>
+    <p class="loader-text">Analyzing your expenses…</p>
+    <p class="loader-sub">Detecting patterns and generating insights</p>
   </div>
 
   <!-- Dashboard -->
   <div id="dashboard">
 
-    <!-- Stat Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="icon-wrap icon-total">
-          <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-        </div>
-        <div class="label">Total Expenses</div>
-        <div class="value" id="stat-total">—</div>
-        <div class="sub"   id="stat-count">0 transactions</div>
-      </div>
-      <div class="stat-card">
-        <div class="icon-wrap icon-largest">
-          <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-        </div>
-        <div class="label">Largest Expense</div>
-        <div class="value" id="stat-largest">—</div>
-        <div class="sub"   id="stat-largest-name">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="icon-wrap icon-avg">
-          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V7h8v2z"/></svg>
-        </div>
-        <div class="label">Average Expense</div>
-        <div class="value" id="stat-avg">—</div>
-        <div class="sub"   id="stat-avg-sub">per transaction</div>
-      </div>
-      <div class="stat-card">
-        <div class="icon-wrap icon-top">
-          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93-2.67-1.14-5-4.43-5-7.93V7.18L12 5z"/></svg>
-        </div>
-        <div class="label">Top Category</div>
-        <div class="value" id="stat-top-cat" style="font-size:1.3rem">—</div>
-        <div class="sub"   id="stat-top-amount">—</div>
-      </div>
+    <!-- Tabs -->
+    <div class="dash-tabs" id="dash-tabs">
+      <button class="dash-tab active" onclick="switchTab('overview',this)">📊 Overview</button>
+      <button class="dash-tab" onclick="isPro?switchTab('ai',this):openPricing()">
+        🤖 AI Insights <span class="tab-pro" id="ai-tab-pro">PRO</span>
+      </button>
+      <button class="dash-tab" onclick="isPro?switchTab('health',this):openPricing()">
+        💚 Health &amp; Forecast <span class="tab-pro" id="health-tab-pro">PRO</span>
+      </button>
+      <button class="dash-tab" onclick="isPro?switchTab('compare',this):openPricing()">
+        🔀 Compare <span class="tab-pro" id="compare-tab-pro">PRO</span>
+      </button>
     </div>
 
-    <!-- Charts -->
-    <div class="charts-row">
-      <div class="chart-card" id="bar-chart-card">
-        <h3>Monthly Spending</h3>
-        <div class="chart-wrap"><canvas id="barChart"></canvas></div>
-      </div>
-      <div class="chart-card" id="donut-chart-card">
-        <h3>Category Breakdown</h3>
-        <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
-      </div>
-    </div>
+    <!-- ── Tab: Overview ── -->
+    <div class="tab-panel active" id="tab-overview">
 
-    <!-- Transactions Table -->
-    <div class="table-card">
-      <div class="table-header">
-        <h3>All Transactions</h3>
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-icon si-purple">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V7h8v2z"/></svg>
+          </div>
+          <h2>Expense Summary</h2>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="s-icon ic-indigo"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
+          <div class="s-label">Total Expenses</div>
+          <div class="s-value" id="stat-total">—</div>
+          <div class="s-sub"  id="stat-count">0 transactions</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon ic-red"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg></div>
+          <div class="s-label">Largest Expense</div>
+          <div class="s-value" id="stat-largest">—</div>
+          <div class="s-sub"  id="stat-largest-name">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon ic-green"><svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg></div>
+          <div class="s-label">Average Expense</div>
+          <div class="s-value" id="stat-avg">—</div>
+          <div class="s-sub"  id="stat-avg-sub">per transaction</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon ic-amber"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93-2.67-1.14-5-4.43-5-7.93V7.18L12 5z"/></svg></div>
+          <div class="s-label">Top Category</div>
+          <div class="s-value" id="stat-top-cat" style="font-size:1.3rem">—</div>
+          <div class="s-sub"  id="stat-top-amount">—</div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card" id="bar-chart-card">
+          <div class="chart-title">Monthly Spending</div>
+          <canvas id="barChart"></canvas>
+        </div>
+        <div class="chart-card" id="donut-chart-card">
+          <div class="chart-title">Category Breakdown</div>
+          <canvas id="donutChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Free AI Insights Preview (2 cards) -->
+      <div class="section-header" style="margin-top:8px">
+        <div class="section-title">
+          <div class="section-icon si-purple"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></div>
+          <h2>AI Insights Preview</h2>
+        </div>
+        <button class="btn btn-pro btn-sm" onclick="openPricing()" id="unlock-insights-btn">✦ Unlock All Insights</button>
+      </div>
+      <div class="insights-grid" id="free-insights-grid"></div>
+      <div style="text-align:center;padding:8px 0 20px">
+        <span style="font-size:.8rem;color:var(--muted)">Showing 2 of <strong id="total-insights-count">—</strong> insights available</span>
+      </div>
+
+      <div class="dash-divider"></div>
+
+      <!-- Transactions -->
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-icon si-green"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></div>
+          <h2>All Transactions</h2>
+        </div>
         <div class="table-controls">
-          <input type="text" id="search-input" placeholder="🔍  Search transactions…" oninput="filterTable()" />
+          <input type="text" id="search-input" placeholder="🔍 Search…" oninput="filterTable()"/>
           <span class="table-meta" id="table-meta"></span>
         </div>
       </div>
-      <div style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Expense / Description</th>
-              <th>Category</th>
+
+      <div class="table-card">
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr>
+              <th>Date</th><th>Expense / Description</th><th>Category</th>
               <th style="text-align:right">Amount</th>
-            </tr>
-          </thead>
-          <tbody id="table-body"></tbody>
-        </table>
+            </tr></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span id="page-info">—</span>
+          <div class="pagination-btns" id="pagination-btns"></div>
+        </div>
       </div>
-      <div class="pagination">
-        <span id="page-info">—</span>
-        <div class="pagination-btns" id="pagination-btns"></div>
+    </div><!-- /tab-overview -->
+
+    <!-- ── Tab: AI Insights ── -->
+    <div class="tab-panel" id="tab-ai">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-icon si-purple"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></div>
+          <h2>AI Financial Insights</h2>
+        </div>
+        <span class="pro-lock-badge">Pro Feature</span>
       </div>
+      <div class="insights-grid" id="all-insights-grid"></div>
+    </div>
+
+    <!-- ── Tab: Health & Forecast ── -->
+    <div class="tab-panel" id="tab-health">
+
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-icon si-green"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+          <h2>Business Health Score</h2>
+        </div>
+        <span class="pro-lock-badge">Pro Feature</span>
+      </div>
+
+      <div class="health-row">
+        <div class="health-score-card">
+          <div class="gauge-wrap">
+            <canvas id="gaugeChart" width="150" height="150"></canvas>
+            <div class="gauge-inner">
+              <div class="gauge-score" id="health-score-val">—</div>
+              <div class="gauge-max">/ 100</div>
+            </div>
+          </div>
+          <div class="health-label">Business Health Score</div>
+          <div class="health-status" id="health-status">—</div>
+          <p style="font-size:.78rem;color:var(--muted);max-width:180px;text-align:center;line-height:1.5" id="health-desc">Upload your expenses to generate your health score.</p>
+        </div>
+        <div class="health-factors-card">
+          <div class="health-factors-title">Score Breakdown</div>
+          <div id="health-factors"></div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-icon si-amber"><svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg></div>
+          <h2>Expense Forecast — Next Month</h2>
+        </div>
+      </div>
+
+      <div class="forecast-row" id="forecast-cards"></div>
+
+    </div><!-- /tab-health -->
+
+    <!-- ── Tab: Compare ── -->
+    <div class="tab-panel" id="tab-compare">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-icon si-amber"><svg viewBox="0 0 24 24"><path d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z"/></svg></div>
+          <h2>Multi-File Comparison</h2>
+        </div>
+        <span class="pro-lock-badge">Pro Feature</span>
+      </div>
+      <div class="multi-upload-area">
+        <div class="file-slot" id="slot-a" onclick="triggerSlotUpload('a')">
+          <div class="slot-icon">📁</div>
+          <div class="slot-title">File A — Baseline</div>
+          <div class="slot-sub">Click to upload first file</div>
+          <div class="slot-loaded-name" id="slot-a-name"></div>
+          <input type="file" id="file-input-a" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadCompareFile('a',event)"/>
+        </div>
+        <div class="file-slot" id="slot-b" onclick="triggerSlotUpload('b')">
+          <div class="slot-icon">📁</div>
+          <div class="slot-title">File B — Compare</div>
+          <div class="slot-sub">Click to upload second file</div>
+          <div class="slot-loaded-name" id="slot-b-name"></div>
+          <input type="file" id="file-input-b" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadCompareFile('b',event)"/>
+        </div>
+      </div>
+      <div id="comparison-results"></div>
     </div>
 
   </div><!-- /dashboard -->
 
 </main>
 
-<div class="footer">ExpenseLens &mdash; Upload, Analyze, Understand your business expenses</div>
+<div class="footer">
+  <strong>ExpenseLens</strong> — Upload · Analyze · Understand your business expenses<br>
+  <span style="font-size:.72rem;margin-top:4px;display:block">Your files are processed locally in your browser. Nothing is uploaded to any server.</span>
+</div>
 
-<!-- ─── JavaScript ──────────────────────────────────── -->
+<!-- ═══ JAVASCRIPT ═══ -->
 <script>
-/* ═══════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    STATE
-═══════════════════════════════════════════════════ */
-let allRows   = [];
-let filtered  = [];
+════════════════════════════════════════════════════ */
+let allRows     = [];
+let filtered    = [];
 let currentPage = 1;
 const PAGE_SIZE = 15;
 let barChartInst   = null;
 let donutChartInst = null;
+let gaugeChartInst = null;
+let rawHeaders = [], rawData = [];
+let colMap = { date:'', name:'', category:'', amount:'' };
+let isPro = false;
 
-let rawHeaders = [];
-let rawData    = [];
-let colMap     = { date: '', name: '', category: '', amount: '' };
+// Compare state
+let compareFiles = { a: null, b: null };
 
-/* ═══════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
+   PRO / PRICING
+════════════════════════════════════════════════════ */
+function openPricing() { document.getElementById('pricing-modal').classList.add('open'); }
+function closePricing() { document.getElementById('pricing-modal').classList.remove('open'); }
+function activatePro() {
+  isPro = true;
+  closePricing();
+  const badge = document.getElementById('plan-badge');
+  badge.textContent = '⭐ Pro Plan';
+  badge.classList.add('pro-badge');
+  // Remove PRO labels from tabs
+  ['ai-tab-pro','health-tab-pro','compare-tab-pro'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  document.getElementById('unlock-insights-btn').style.display = 'none';
+  if (allRows.length > 0) {
+    renderAllInsights();
+    renderHealthScore();
+    renderForecast();
+  }
+  alert('✨ Pro unlocked! You can now access all AI insights, health score, forecasting, and multi-file comparison.');
+}
+
+/* ════════════════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════════════════ */
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+/* ════════════════════════════════════════════════════
    FILE HANDLING
-═══════════════════════════════════════════════════ */
+════════════════════════════════════════════════════ */
 function handleDrop(e) {
   e.preventDefault();
   document.getElementById('upload-section').classList.remove('drag-over');
@@ -459,140 +950,112 @@ function handleFileUpload(e) {
 function processFile(file) {
   showLoader();
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = (ev) => {
     try {
-      const data = new Uint8Array(e.target.result);
-      const wb   = XLSX.read(data, { type: 'array', cellDates: true });
+      const data = new Uint8Array(ev.target.result);
+      const wb   = XLSX.read(data, { type:'array', cellDates:true });
       const ws   = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      if (!json || json.length < 2) {
-        alert('The file appears to be empty or has only one row. Please check your file.');
-        hideLoader(); return;
-      }
+      const json = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+      if (!json || json.length < 2) { alert('File appears empty.'); hideLoader(); return; }
       rawHeaders = json[0].map(h => String(h).trim());
-      rawData    = json.slice(1).filter(row => row.some(cell => cell !== ''));
+      rawData    = json.slice(1).filter(row => row.some(c => c !== ''));
       autoDetectColumns();
-    } catch (err) { alert('Error reading file: ' + err.message); hideLoader(); }
+    } catch(err) { alert('Error reading file: ' + err.message); hideLoader(); }
   };
   reader.readAsArrayBuffer(file);
 }
 
-/* ═══════════════════════════════════════════════════
-   COLUMN AUTO-DETECTION
-═══════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   COLUMN DETECTION
+════════════════════════════════════════════════════ */
 function autoDetectColumns() {
   const lower    = rawHeaders.map(h => h.toLowerCase());
-  const dateKw   = ['date','day','time','period','when'];
-  const nameKw   = ['name','description','desc','expense','item','detail','memo','note','vendor','merchant','payee','title'];
-  const catKw    = ['category','cat','type','group','class','tag'];
-  const amountKw = ['amount','total','cost','price','sum','value','spend','charge','debit','payment','paid'];
-
+  const dateKw   = ['date','day','time','period','when','invoice date','trans'];
+  const nameKw   = ['name','description','desc','expense','item','detail','memo','note','vendor','merchant','payee','title','narration','particulars'];
+  const catKw    = ['category','cat','type','group','class','tag','dept','department'];
+  const amountKw = ['amount','total','cost','price','sum','value','spend','charge','debit','payment','paid','net','gross'];
   colMap.date     = findCol(lower, dateKw);
   colMap.name     = findCol(lower, nameKw);
   colMap.category = findCol(lower, catKw);
   colMap.amount   = findCol(lower, amountKw);
-
-  if (colMap.amount === '') {
-    for (let i = 0; i < rawHeaders.length; i++) {
-      if (isNumericCol(i)) { colMap.amount = rawHeaders[i]; break; }
-    }
-  }
-  const missing = Object.entries(colMap).filter(([,v]) => v === '').map(([k]) => k);
-  if (missing.length === 0) buildDashboard();
+  if (!colMap.amount) for (let i=0;i<rawHeaders.length;i++) if (isNumericCol(i)) { colMap.amount=rawHeaders[i]; break; }
+  const missing = Object.entries(colMap).filter(([,v])=>v==='').map(([k])=>k);
+  if (missing.length===0) buildDashboard();
   else { hideLoader(); showColumnBanner(missing); }
 }
-function findCol(lower, keywords) {
-  for (const kw of keywords) {
-    const idx = lower.findIndex(h => h.includes(kw));
-    if (idx !== -1) return rawHeaders[idx];
-  }
+function findCol(lower, kws) {
+  for (const kw of kws) { const i=lower.findIndex(h=>h.includes(kw)); if(i!==-1) return rawHeaders[i]; }
   return '';
 }
-function isNumericCol(colIdx) {
-  let count = 0;
-  for (let i = 0; i < Math.min(rawData.length, 10); i++) {
-    const val = rawData[i][colIdx];
-    if (val !== '' && !isNaN(parseFloat(String(val).replace(/[$,]/g,'')))) count++;
+function isNumericCol(ci) {
+  let c=0;
+  for(let i=0;i<Math.min(rawData.length,10);i++) {
+    const v=rawData[i][ci];
+    if(v!==''&&!isNaN(parseFloat(String(v).replace(/[$,]/g,'')))) c++;
   }
-  return count >= 3;
+  return c>=3;
 }
 
-/* ═══════════════════════════════════════════════════
-   COLUMN MAPPING BANNER
-═══════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   COLUMN MAP BANNER
+════════════════════════════════════════════════════ */
 function showColumnBanner(missing) {
-  const banner   = document.getElementById('column-map-banner');
   const controls = document.getElementById('col-map-controls');
   controls.innerHTML = '';
-  const options  = rawHeaders.map(h => `<option value="${h}">${h}</option>`);
-  const blankOpt = `<option value="">-- Select --</option>`;
-  const labels   = { date: 'Date Column', name: 'Expense Name / Description', category: 'Category', amount: 'Amount' };
+  const opts  = rawHeaders.map(h=>`<option value="${h}">${h}</option>`).join('');
+  const blank = `<option value="">-- Select --</option>`;
+  const lbls  = { date:'Date', name:'Expense / Description', category:'Category', amount:'Amount' };
   for (const key of Object.keys(colMap)) {
-    const label = document.createElement('label');
-    label.innerHTML = `${labels[key]}: <select id="map-${key}">${blankOpt}${options.join('')}</select> `;
-    const sel = label.querySelector('select');
-    if (colMap[key]) sel.value = colMap[key];
-    controls.appendChild(label);
+    const lbl = document.createElement('label');
+    lbl.innerHTML = `${lbls[key]}: <select id="map-${key}">${blank}${opts}</select>`;
+    if (colMap[key]) lbl.querySelector('select').value = colMap[key];
+    controls.appendChild(lbl);
   }
-  banner.style.display = 'block';
-  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('column-map-banner').style.display = 'block';
+  document.getElementById('upload-section').style.display    = 'none';
 }
 function applyColumnMap() {
   colMap.date     = document.getElementById('map-date')?.value     || '';
   colMap.name     = document.getElementById('map-name')?.value     || '';
   colMap.category = document.getElementById('map-category')?.value || '';
   colMap.amount   = document.getElementById('map-amount')?.value   || '';
-  if (!colMap.amount) { alert('Please select at least the Amount column to continue.'); return; }
+  if (!colMap.amount) { alert('Please select the Amount column.'); return; }
   document.getElementById('column-map-banner').style.display = 'none';
-  showLoader();
-  setTimeout(buildDashboard, 50);
+  showLoader(); setTimeout(buildDashboard, 50);
 }
 
-/* ═══════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    BUILD DASHBOARD
-═══════════════════════════════════════════════════ */
+════════════════════════════════════════════════════ */
 function buildDashboard() {
-  const dateIdx   = rawHeaders.indexOf(colMap.date);
-  const nameIdx   = rawHeaders.indexOf(colMap.name);
-  const catIdx    = rawHeaders.indexOf(colMap.category);
-  const amountIdx = rawHeaders.indexOf(colMap.amount);
-
+  const di=rawHeaders.indexOf(colMap.date), ni=rawHeaders.indexOf(colMap.name);
+  const ci=rawHeaders.indexOf(colMap.category), ai=rawHeaders.indexOf(colMap.amount);
   allRows = [];
   for (const row of rawData) {
-    const rawAmt = row[amountIdx];
-    let amount   = parseFloat(String(rawAmt).replace(/[$,\s]/g,''));
+    let amount = parseFloat(String(row[ai]||'').replace(/[$,\s]/g,''));
     if (isNaN(amount)) continue;
     amount = Math.abs(amount);
-
-    let dateVal = dateIdx >= 0 ? row[dateIdx] : null;
     let dateStr = '';
-    if (dateVal instanceof Date) {
-      dateStr = dateVal.toISOString().split('T')[0];
-    } else if (dateVal) {
-      const num = parseFloat(String(dateVal));
-      if (!isNaN(num) && num > 1000) {
-        const parsed = XLSX.SSF.parse_date_code(num);
-        if (parsed) dateStr = `${parsed.y}-${String(parsed.m).padStart(2,'0')}-${String(parsed.d).padStart(2,'0')}`;
-      } else { dateStr = String(dateVal); }
+    const dv = di>=0 ? row[di] : null;
+    if (dv instanceof Date) { dateStr = dv.toISOString().split('T')[0]; }
+    else if (dv) {
+      const n = parseFloat(String(dv));
+      if (!isNaN(n)&&n>1000) { const p=XLSX.SSF.parse_date_code(n); if(p) dateStr=`${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`; }
+      else dateStr = String(dv);
     }
-    const name     = nameIdx >= 0 ? String(row[nameIdx]  || '').trim() : '';
-    const category = catIdx  >= 0 ? String(row[catIdx]   || '').trim() : 'Uncategorized';
-    allRows.push({ date: dateStr, name: name || 'N/A', category: category || 'Uncategorized', amount });
+    allRows.push({
+      date: dateStr,
+      name: ni>=0 ? (String(row[ni]||'').trim()||'N/A') : 'N/A',
+      category: ci>=0 ? (String(row[ci]||'').trim()||'Uncategorized') : 'Uncategorized',
+      amount
+    });
   }
-
-  if (allRows.length === 0) {
-    alert('No valid expense rows found. Please check the column mapping and your file.');
-    hideLoader();
-    document.getElementById('upload-section').style.display = '';
-    return;
-  }
-
+  if (!allRows.length) { alert('No valid rows found. Check column mapping.'); hideLoader(); document.getElementById('upload-section').style.display=''; return; }
   renderStats();
   renderCharts();
-  filtered = [...allRows];
-  currentPage = 1;
-  renderTable();
-
+  renderFreeInsights();
+  filtered = [...allRows]; currentPage=1; renderTable();
+  if (isPro) { renderAllInsights(); renderHealthScore(); renderForecast(); }
   hideLoader();
   document.getElementById('upload-section').style.display = 'none';
   document.getElementById('dashboard').style.display      = 'block';
@@ -600,467 +1063,581 @@ function buildDashboard() {
   document.getElementById('download-btn').style.display   = '';
 }
 
-/* ═══════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    STATS
-═══════════════════════════════════════════════════ */
+════════════════════════════════════════════════════ */
 function renderStats() {
-  const total   = allRows.reduce((s,r) => s + r.amount, 0);
-  const avg     = total / allRows.length;
-  const largest = allRows.reduce((m,r) => r.amount > m.amount ? r : m, allRows[0]);
-  const catTotals = {};
-  for (const r of allRows) catTotals[r.category] = (catTotals[r.category] || 0) + r.amount;
-  const topCat = Object.entries(catTotals).sort((a,b) => b[1]-a[1])[0];
-
+  const total   = allRows.reduce((s,r)=>s+r.amount, 0);
+  const avg     = total/allRows.length;
+  const largest = allRows.reduce((m,r)=>r.amount>m.amount?r:m, allRows[0]);
+  const catT = {};
+  for (const r of allRows) catT[r.category]=(catT[r.category]||0)+r.amount;
+  const top = Object.entries(catT).sort((a,b)=>b[1]-a[1])[0];
   document.getElementById('stat-total').textContent        = fmt(total);
   document.getElementById('stat-count').textContent        = `${allRows.length} transactions`;
   document.getElementById('stat-largest').textContent      = fmt(largest.amount);
-  document.getElementById('stat-largest-name').textContent = largest.name.length > 28 ? largest.name.slice(0,28)+'…' : largest.name;
+  document.getElementById('stat-largest-name').textContent = largest.name.length>26?largest.name.slice(0,26)+'…':largest.name;
   document.getElementById('stat-avg').textContent          = fmt(avg);
-  document.getElementById('stat-top-cat').textContent      = topCat[0];
-  document.getElementById('stat-top-amount').textContent   = fmt(topCat[1]) + ' total';
+  document.getElementById('stat-top-cat').textContent      = top[0];
+  document.getElementById('stat-top-amount').textContent   = fmt(top[1])+' total';
 }
 
-/* ═══════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    CHARTS
-═══════════════════════════════════════════════════ */
-function renderCharts() {
-  const monthly = {};
-  for (const r of allRows) {
-    const key = r.date ? r.date.slice(0,7) : 'Unknown';
-    monthly[key] = (monthly[key] || 0) + r.amount;
-  }
-  const sortedMonths = Object.keys(monthly).sort();
-  const monthLabels  = sortedMonths.map(m => {
-    if (m === 'Unknown') return 'Unknown';
-    const [y, mo] = m.split('-');
-    return new Date(+y, +mo-1, 1).toLocaleString('default', { month:'short', year:'2-digit' });
-  });
+════════════════════════════════════════════════════ */
+const PALETTE = ['#5b50e8','#8b5cf6','#db2777','#e53935','#f59e0b','#12b76a','#0891b2','#0284c7','#f97316','#84cc16'];
 
+function renderCharts() {
+  // Monthly bar
+  const monthly = {};
+  for (const r of allRows) { const k=r.date?r.date.slice(0,7):'Unknown'; monthly[k]=(monthly[k]||0)+r.amount; }
+  const months = Object.keys(monthly).sort();
+  const mLabels = months.map(m=>{ if(m==='Unknown')return 'Unknown'; const [y,mo]=m.split('-'); return new Date(+y,+mo-1,1).toLocaleString('default',{month:'short',year:'2-digit'}); });
   if (barChartInst) barChartInst.destroy();
   barChartInst = new Chart(document.getElementById('barChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: monthLabels,
-      datasets: [{
-        label: 'Total Spending',
-        data: sortedMonths.map(m => +monthly[m].toFixed(2)),
-        backgroundColor: 'rgba(79,70,229,.85)',
-        borderRadius: 6, borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: { duration: 600 },
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ' ' + fmt(ctx.raw) } }
-      },
-      scales: {
-        x: { grid: { display: false } },
-        y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => '$'+(v>=1000 ? (v/1000).toFixed(1)+'k' : v) } }
-      }
-    }
+    type:'bar',
+    data:{ labels:mLabels, datasets:[{ label:'Spending', data:months.map(m=>+monthly[m].toFixed(2)), backgroundColor:'rgba(91,80,232,.8)', borderRadius:7, borderSkipped:false }] },
+    options:{ responsive:true, animation:{duration:700,easing:'easeOutQuart'}, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:11}}}, y:{grid:{color:'#f0ebe4'},ticks:{callback:v=>'$'+(v>=1000?(v/1000).toFixed(1)+'k':v),font:{size:11}}} } }
   });
-
-  const catTotals  = {};
-  for (const r of allRows) catTotals[r.category] = (catTotals[r.category] || 0) + r.amount;
-  const sortedCats = Object.entries(catTotals).sort((a,b) => b[1]-a[1]);
-  const palette    = ['#4f46e5','#7c3aed','#db2777','#dc2626','#d97706','#65a30d','#0891b2','#0284c7','#84cc16','#f97316'];
-
+  // Donut
+  const catT={};
+  for (const r of allRows) catT[r.category]=(catT[r.category]||0)+r.amount;
+  const cats = Object.entries(catT).sort((a,b)=>b[1]-a[1]);
   if (donutChartInst) donutChartInst.destroy();
+  const total = allRows.reduce((s,r)=>s+r.amount,0);
   donutChartInst = new Chart(document.getElementById('donutChart').getContext('2d'), {
-    type: 'doughnut',
-    data: {
-      labels: sortedCats.map(([k]) => k),
-      datasets: [{
-        data: sortedCats.map(([,v]) => +v.toFixed(2)),
-        backgroundColor: sortedCats.map((_,i) => palette[i % palette.length]),
-        borderWidth: 2, borderColor: '#fff',
-      }]
-    },
-    options: {
-      responsive: true, cutout: '60%',
-      animation: { duration: 600 },
-      plugins: {
-        legend: { position:'bottom', labels:{ boxWidth:12, padding:12, font:{size:11} } },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} (${((ctx.raw/allRows.reduce((s,r)=>s+r.amount,0))*100).toFixed(1)}%)`
-          }
-        }
-      }
-    }
+    type:'doughnut',
+    data:{ labels:cats.map(([k])=>k), datasets:[{ data:cats.map(([,v])=>+v.toFixed(2)), backgroundColor:cats.map((_,i)=>PALETTE[i%PALETTE.length]), borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, cutout:'62%', animation:{duration:700}, plugins:{ legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:10}}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)} (${((c.raw/total)*100).toFixed(1)}%)`}} } }
   });
 }
 
-/* ═══════════════════════════════════════════════════
-   TABLE + SEARCH + PAGINATION
-═══════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   AI INSIGHTS (algorithmic)
+════════════════════════════════════════════════════ */
+function generateInsights() {
+  const total = allRows.reduce((s,r)=>s+r.amount,0);
+  const avg   = total/allRows.length;
+  const catT  = {};
+  for (const r of allRows) catT[r.category]=(catT[r.category]||0)+r.amount;
+  const sortedCats = Object.entries(catT).sort((a,b)=>b[1]-a[1]);
+  const topCat = sortedCats[0];
+  const catCount = sortedCats.length;
+
+  // Monthly totals
+  const monthly = {};
+  for (const r of allRows) { const k=r.date?r.date.slice(0,7):'Unknown'; monthly[k]=(monthly[k]||0)+r.amount; }
+  const monthVals = Object.keys(monthly).sort().map(m=>monthly[m]);
+
+  const insights = [];
+
+  // 1. Top category concentration
+  const topPct = (topCat[1]/total*100).toFixed(1);
+  const topLevel = topPct>50?'danger':topPct>35?'warn':'success';
+  insights.push({
+    emoji: '🏷️', type: topLevel,
+    title: 'Category Concentration',
+    body: `<strong>${topCat[0]}</strong> accounts for <strong>${topPct}%</strong> of your total spending (${fmt(topCat[1])}). ${topPct>50?'This heavy concentration could be a risk — consider whether this is essential spend.':topPct>35?'This is above average. Review if this category can be optimized.':'Good distribution across categories.'}`,
+    highlight: topPct>50?{cls:'bad',text:`⚠ ${topPct}% concentration`}:topPct>35?{cls:'warn',text:`${topPct}% of total`}:{cls:'good',text:`Healthy spread`}
+  });
+
+  // 2. High-value transaction check
+  const highVal = allRows.filter(r=>r.amount>avg*3);
+  if (highVal.length>0) {
+    insights.push({
+      emoji:'💸', type:'warn',
+      title:'Unusually Large Transactions',
+      body:`Found <strong>${highVal.length} transaction${highVal.length>1?'s':''}</strong> that are over 3× your average of ${fmt(avg)}. The largest is <strong>${fmt(highVal[0].amount)}</strong> for "${highVal[0].name}". Review these for accuracy.`,
+      highlight:{cls:'warn',text:`${highVal.length} outlier${highVal.length>1?'s':''} detected`}
+    });
+  } else {
+    insights.push({
+      emoji:'✅', type:'success',
+      title:'Transaction Consistency',
+      body:`No unusually large transactions detected. Your spending is consistent with an average of ${fmt(avg)} per transaction, which indicates stable expense patterns.`,
+      highlight:{cls:'good',text:'No outliers detected'}
+    });
+  }
+
+  // 3. Month-over-month growth
+  if (monthVals.length>=2) {
+    const last = monthVals[monthVals.length-1];
+    const prev = monthVals[monthVals.length-2];
+    const growth = ((last-prev)/prev*100).toFixed(1);
+    const gLevel = growth>20?'danger':growth>5?'warn':'success';
+    insights.push({
+      emoji: growth>0?'📈':'📉', type:gLevel,
+      title:'Month-over-Month Growth',
+      body:`Spending ${growth>0?'increased':'decreased'} by <strong>${Math.abs(growth)}%</strong> from the previous month (${fmt(prev)} → ${fmt(last)}). ${growth>20?'This is a significant increase — investigate which categories drove this spike.':growth>5?'Moderate increase. Monitor closely.':'Spending is stable or decreasing. '}`,
+      highlight:{cls:growth>20?'bad':growth>5?'warn':'good', text:`${growth>0?'+':''}${growth}% vs last month`}
+    });
+  }
+
+  // 4. Category diversity
+  const divLevel = catCount>8?'success':catCount>4?'warn':'danger';
+  insights.push({
+    emoji:'🗂️', type:divLevel,
+    title:'Expense Diversity',
+    body:`Your expenses span <strong>${catCount} categories</strong>. ${catCount<4?'Very few categories — you may be missing proper expense classification.':catCount>8?'Well-diversified tracking across many categories.':'Moderate category spread.'} Proper categorization helps identify saving opportunities.`,
+    highlight:{cls:catCount<4?'bad':catCount>8?'good':'warn',text:`${catCount} categories tracked`}
+  });
+
+  // 5. Saving opportunity
+  const secondCat = sortedCats[1];
+  if (secondCat) {
+    const savePct = (secondCat[1]/total*100).toFixed(1);
+    insights.push({
+      emoji:'💡', type:'success',
+      title:'Cost Saving Opportunity',
+      body:`Your second-largest category <strong>${secondCat[0]}</strong> represents ${savePct}% of total spend (${fmt(secondCat[1])}). A 15% reduction here would save you approximately <strong>${fmt(secondCat[1]*0.15)}</strong> per period.`,
+      highlight:{cls:'good',text:`~${fmt(secondCat[1]*0.15)} potential savings`}
+    });
+  }
+
+  // 6. Weekday/recurring detection
+  const nameFreq = {};
+  for (const r of allRows) nameFreq[r.name]=(nameFreq[r.name]||0)+1;
+  const recurring = Object.entries(nameFreq).filter(([,c])=>c>=3).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  if (recurring.length>0) {
+    insights.push({
+      emoji:'🔄', type:'warn',
+      title:'Recurring Expenses Detected',
+      body:`Found <strong>${recurring.length}</strong> recurring expense${recurring.length>1?'s':''}: ${recurring.map(([n,c])=>`"${n}" (${c}×)`).join(', ')}. Review subscriptions and recurring charges to ensure all are still necessary.`,
+      highlight:{cls:'warn',text:`${recurring.length} recurring detected`}
+    });
+  }
+
+  return insights;
+}
+
+function renderFreeInsights() {
+  const insights = generateInsights();
+  document.getElementById('total-insights-count').textContent = insights.length;
+  const grid = document.getElementById('free-insights-grid');
+  grid.innerHTML = insights.slice(0,2).map(ins => insightCardHTML(ins)).join('');
+}
+function renderAllInsights() {
+  const insights = generateInsights();
+  const grid = document.getElementById('all-insights-grid');
+  grid.innerHTML = insights.map(ins => insightCardHTML(ins)).join('');
+}
+function insightCardHTML(ins) {
+  return `<div class="insight-card ${ins.type}">
+    <span class="insight-emoji">${ins.emoji}</span>
+    <div class="insight-title">${ins.title}</div>
+    <div class="insight-body">${ins.body}</div>
+    ${ins.highlight?`<div class="insight-highlight ${ins.highlight.cls}">${ins.highlight.text}</div>`:''}
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════════
+   HEALTH SCORE
+════════════════════════════════════════════════════ */
+function renderHealthScore() {
+  const total   = allRows.reduce((s,r)=>s+r.amount,0);
+  const catT    = {};
+  for (const r of allRows) catT[r.category]=(catT[r.category]||0)+r.amount;
+  const cats    = Object.entries(catT).sort((a,b)=>b[1]-a[1]);
+  const topPct  = cats[0][1]/total;
+  const monthly = {};
+  for (const r of allRows) { const k=r.date?r.date.slice(0,7):'X'; monthly[k]=(monthly[k]||0)+r.amount; }
+  const mv = Object.keys(monthly).sort().map(k=>monthly[k]);
+
+  // Factors (0-25 each = 100 total)
+  // 1. Category balance (lower top concentration = better)
+  const f1 = Math.round(Math.max(0, 25*(1 - topPct)));
+  // 2. Month-over-month stability
+  let f2 = 20;
+  if (mv.length>=2) {
+    const growth = (mv[mv.length-1]-mv[mv.length-2])/mv[mv.length-2];
+    if (growth>0.3) f2=5; else if (growth>0.15) f2=12; else if (growth<-0.1) f2=18;
+  }
+  // 3. Transaction consistency (low std dev = better)
+  const mean = total/allRows.length;
+  const stddev = Math.sqrt(allRows.reduce((s,r)=>s+(r.amount-mean)**2,0)/allRows.length);
+  const cv = stddev/mean;
+  const f3 = Math.round(Math.max(0, 25*(1 - Math.min(cv,2)/2)));
+  // 4. Category diversity
+  const f4 = Math.min(25, cats.length*4);
+
+  const score = Math.min(100, f1+f2+f3+f4);
+  const isGood = score>=70, isWarn = score>=40&&score<70;
+  const color  = isGood?'#12b76a':isWarn?'#f79009':'#e53935';
+  const statusText = isGood?'Healthy 🟢':isWarn?'Needs Attention 🟡':'At Risk 🔴';
+  const statusCls  = isGood?'hs-good':isWarn?'hs-warn':'hs-bad';
+  const desc = isGood?'Your business finances show healthy patterns with good expense distribution.':isWarn?'Some areas need attention. Review category concentration and spending trends.':'Several risk factors detected. Consider reviewing your expense structure immediately.';
+
+  document.getElementById('health-score-val').textContent = score;
+  document.getElementById('health-score-val').style.color = color;
+  document.getElementById('health-status').textContent    = statusText;
+  document.getElementById('health-status').className      = 'health-status ' + statusCls;
+  document.getElementById('health-desc').textContent      = desc;
+
+  // Gauge chart
+  if (gaugeChartInst) gaugeChartInst.destroy();
+  const remaining = 100-score;
+  gaugeChartInst = new Chart(document.getElementById('gaugeChart').getContext('2d'), {
+    type:'doughnut',
+    data:{ datasets:[{ data:[score,remaining], backgroundColor:[color,'#f0ebe4'], borderWidth:0, circumference:240, rotation:240 }] },
+    options:{ responsive:false, cutout:'78%', plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:900,easing:'easeOutQuart'} }
+  });
+
+  // Factor cards
+  const factors = [
+    { icon:'🗂️', name:'Category Balance', desc:`Top category: ${(topPct*100).toFixed(0)}% of spending`, score:f1, max:25 },
+    { icon:'📈', name:'Spending Stability', desc:mv.length>=2?`Month growth: ${((mv[mv.length-1]-mv[mv.length-2])/mv[mv.length-2]*100).toFixed(1)}%`:'Insufficient data', score:f2, max:25 },
+    { icon:'📊', name:'Transaction Consistency', desc:`Variation coefficient: ${cv.toFixed(2)}`, score:f3, max:25 },
+    { icon:'🏷️', name:'Category Diversity', desc:`${cats.length} categories tracked`, score:f4, max:25 },
+  ];
+  document.getElementById('health-factors').innerHTML = factors.map(f => {
+    const pct = (f.score/f.max*100);
+    const barCls = pct>=70?'fb-green':pct>=40?'fb-amber':'fb-red';
+    return `<div class="factor-row">
+      <div class="factor-icon">${f.icon}</div>
+      <div class="factor-info"><div class="factor-name">${f.name}</div><div class="factor-desc">${f.desc}</div></div>
+      <div class="factor-bar-wrap"><div class="factor-bar ${barCls}" style="width:${pct}%"></div></div>
+      <div class="factor-score">${f.score}/${f.max}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════
+   FORECASTING
+════════════════════════════════════════════════════ */
+function renderForecast() {
+  const monthly = {};
+  for (const r of allRows) { const k=r.date?r.date.slice(0,7):'X'; monthly[k]=(monthly[k]||0)+r.amount; }
+  const mKeys = Object.keys(monthly).sort().filter(k=>k!=='X');
+  const mVals = mKeys.map(k=>monthly[k]);
+  const total = allRows.reduce((s,r)=>s+r.amount,0);
+  const avg   = total/allRows.length;
+
+  let predicted = mVals.length>=2 ? linearForecast(mVals) : (mVals[0]||total);
+  const lastMonth = mVals[mVals.length-1]||0;
+  const change = lastMonth>0?(predicted-lastMonth)/lastMonth*100:0;
+
+  // Top predicted category (simple: scale by category share)
+  const catT={};
+  for(const r of allRows) catT[r.category]=(catT[r.category]||0)+r.amount;
+  const topCat=Object.entries(catT).sort((a,b)=>b[1]-a[1])[0];
+  const predictedTopCat = predicted*(topCat[1]/total);
+
+  const trendCls = change>15?'trend-up':change<-5?'trend-down':'trend-flat';
+  const trendIcon = change>0?'↑':'↓';
+  const riskLevel = change>20?'⚠️ High Risk':change>10?'⚡ Moderate':'✅ Stable';
+
+  document.getElementById('forecast-cards').innerHTML = `
+    <div class="forecast-card highlight">
+      <div class="forecast-icon"><svg viewBox="0 0 24 24" style="fill:#fff"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg></div>
+      <div class="forecast-label">Predicted Total</div>
+      <div class="forecast-value">${fmt(predicted)}</div>
+      <div class="forecast-sub">Next month forecast</div>
+      <div class="forecast-trend ${trendCls}">${trendIcon} ${Math.abs(change).toFixed(1)}% vs last month</div>
+    </div>
+    <div class="forecast-card">
+      <div class="forecast-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93-2.67-1.14-5-4.43-5-7.93V7.18L12 5z"/></svg></div>
+      <div class="forecast-label">Highest Category</div>
+      <div class="forecast-value" style="font-size:1.2rem">${topCat[0]}</div>
+      <div class="forecast-sub">Expected: ${fmt(predictedTopCat)}</div>
+    </div>
+    <div class="forecast-card">
+      <div class="forecast-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+      <div class="forecast-label">Risk Assessment</div>
+      <div class="forecast-value" style="font-size:1.1rem">${riskLevel}</div>
+      <div class="forecast-sub">${change>20?'Significant spend increase predicted':'Spending appears predictable'}</div>
+    </div>
+    <div class="forecast-card">
+      <div class="forecast-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
+      <div class="forecast-label">Savings Potential</div>
+      <div class="forecast-value">${fmt(predicted*0.12)}</div>
+      <div class="forecast-sub">If you cut 12% from top categories</div>
+    </div>
+  `;
+}
+
+function linearForecast(vals) {
+  const n = vals.length;
+  const sumX = n*(n-1)/2;
+  const sumY = vals.reduce((a,b)=>a+b,0);
+  const sumXY = vals.reduce((s,v,i)=>s+i*v,0);
+  const sumX2 = vals.reduce((s,_,i)=>s+i*i,0);
+  const slope = (n*sumXY - sumX*sumY)/(n*sumX2 - sumX*sumX);
+  const intercept = (sumY - slope*sumX)/n;
+  return Math.max(0, intercept + slope*n);
+}
+
+/* ════════════════════════════════════════════════════
+   MULTI-FILE COMPARISON
+════════════════════════════════════════════════════ */
+function triggerSlotUpload(slot) {
+  if (compareFiles[slot]) return;
+  document.getElementById(`file-input-${slot}`).click();
+}
+function loadCompareFile(slot, ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const wb   = XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if (!json||json.length<2) return;
+      const headers = json[0].map(h=>String(h).trim());
+      const lower   = headers.map(h=>h.toLowerCase());
+      const aiIdx = lower.findIndex(h=>['amount','total','cost','price','sum','debit','payment'].some(kw=>h.includes(kw)));
+      const catIdx = lower.findIndex(h=>['category','cat','type','group'].some(kw=>h.includes(kw)));
+      const rows = json.slice(1).filter(r=>r.some(c=>c!=='')).map(r=>{
+        const amt=parseFloat(String(r[aiIdx]||'').replace(/[$,]/g,''));
+        return { amount:isNaN(amt)?0:Math.abs(amt), category:catIdx>=0?(String(r[catIdx]||'').trim()||'Other'):'Other' };
+      }).filter(r=>r.amount>0);
+      compareFiles[slot] = { name: file.name, rows };
+      document.getElementById(`slot-${slot}-name`).textContent = `✓ ${file.name}`;
+      document.getElementById(`slot-${slot}`).classList.add('loaded');
+      if (compareFiles.a && compareFiles.b) renderComparison();
+    } catch(err) { alert('Error reading file: '+err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderComparison() {
+  const a=compareFiles.a, b=compareFiles.b;
+  const totalA=a.rows.reduce((s,r)=>s+r.amount,0);
+  const totalB=b.rows.reduce((s,r)=>s+r.amount,0);
+  const avgA=totalA/a.rows.length, avgB=totalB/b.rows.length;
+  const change=((totalB-totalA)/totalA*100).toFixed(1);
+  const avgChange=((avgB-avgA)/avgA*100).toFixed(1);
+
+  // Category comparison
+  const catA={},catB={};
+  for(const r of a.rows) catA[r.category]=(catA[r.category]||0)+r.amount;
+  for(const r of b.rows) catB[r.category]=(catB[r.category]||0)+r.amount;
+  const allCats=[...new Set([...Object.keys(catA),...Object.keys(catB)])].sort();
+
+  const changeCls=(v)=>parseFloat(v)>0?'cc-up':'cc-down';
+  const changeIcon=(v)=>parseFloat(v)>0?'↑':'↓';
+
+  document.getElementById('comparison-results').innerHTML=`
+    <div class="comparison-card">
+      <div class="comparison-title">Overall Summary</div>
+      <div class="comp-stat-row">
+        <div class="comp-stat"><div class="comp-stat-label">File A Total</div><div class="comp-stat-val">${fmt(totalA)}</div><div class="comp-stat-fname">${a.name}</div></div>
+        <div class="comp-divider">→</div>
+        <div class="comp-stat"><div class="comp-stat-label">File B Total</div><div class="comp-stat-val">${fmt(totalB)}</div><div class="comp-stat-fname">${b.name}</div><div class="comp-change ${changeCls(change)}">${changeIcon(change)} ${Math.abs(change)}%</div></div>
+      </div>
+      <div class="comp-stat-row" style="margin-top:8px">
+        <div class="comp-stat"><div class="comp-stat-label">Avg per Transaction (A)</div><div class="comp-stat-val" style="font-size:.95rem">${fmt(avgA)}</div></div>
+        <div class="comp-divider">→</div>
+        <div class="comp-stat"><div class="comp-stat-label">Avg per Transaction (B)</div><div class="comp-stat-val" style="font-size:.95rem">${fmt(avgB)}</div><div class="comp-change ${changeCls(avgChange)}">${changeIcon(avgChange)} ${Math.abs(avgChange)}%</div></div>
+      </div>
+    </div>
+    <div class="comparison-card">
+      <div class="comparison-title">Category-by-Category Change</div>
+      ${allCats.map(cat=>{
+        const va=catA[cat]||0, vb=catB[cat]||0;
+        const diff=va>0?((vb-va)/va*100).toFixed(1):null;
+        return `<div class="comp-stat-row" style="margin-bottom:8px">
+          <div class="comp-stat" style="text-align:left"><div class="comp-stat-label">${cat}</div><div class="comp-stat-val" style="font-size:.9rem">${fmt(va)}</div></div>
+          <div class="comp-divider">→</div>
+          <div class="comp-stat"><div class="comp-stat-val" style="font-size:.9rem">${fmt(vb)}</div>${diff!==null?`<div class="comp-change ${changeCls(diff)}">${changeIcon(diff)} ${Math.abs(diff)}%</div>`:'<div class="comp-change cc-up">New</div>'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════════════
+   TABLE
+════════════════════════════════════════════════════ */
 function filterTable() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  filtered = allRows.filter(r =>
-    r.name.toLowerCase().includes(q) ||
-    r.category.toLowerCase().includes(q) ||
-    r.date.includes(q) ||
-    String(r.amount).includes(q)
-  );
-  currentPage = 1;
-  renderTable();
+  const q=document.getElementById('search-input').value.toLowerCase();
+  filtered=allRows.filter(r=>r.name.toLowerCase().includes(q)||r.category.toLowerCase().includes(q)||r.date.includes(q)||String(r.amount).includes(q));
+  currentPage=1; renderTable();
 }
 function renderTable() {
-  const start = (currentPage-1) * PAGE_SIZE;
-  const page  = filtered.slice(start, start+PAGE_SIZE);
-  const total = filtered.length;
-  const pages = Math.ceil(total / PAGE_SIZE);
-
-  document.getElementById('table-body').innerHTML = page.map(r => `
+  const start=( currentPage-1)*PAGE_SIZE;
+  const page=filtered.slice(start,start+PAGE_SIZE);
+  const total=filtered.length, pages=Math.ceil(total/PAGE_SIZE);
+  document.getElementById('table-body').innerHTML=page.map(r=>`
     <tr>
-      <td>${r.date || '—'}</td>
+      <td>${r.date||'—'}</td>
       <td>${escHtml(r.name)}</td>
-      <td><span class="category-chip">${escHtml(r.category)}</span></td>
-      <td class="amount-cell amount-pos" style="text-align:right">${fmt(r.amount)}</td>
-    </tr>
-  `).join('');
-
-  document.getElementById('page-info').textContent =
-    `Showing ${Math.min(start+1,total)}–${Math.min(start+PAGE_SIZE,total)} of ${total}`;
-  document.getElementById('table-meta').textContent = `${total} records`;
-
-  const btns = document.getElementById('pagination-btns');
-  btns.innerHTML = '';
-  const addBtn = (label, pg, disabled, active) => {
-    const b = document.createElement('button');
-    b.className = 'page-btn' + (active ? ' active' : '');
-    b.textContent = label; b.disabled = disabled;
-    b.onclick = () => { currentPage = pg; renderTable(); };
-    btns.appendChild(b);
+      <td><span class="cat-chip">${escHtml(r.category)}</span></td>
+      <td class="amt-cell" style="text-align:right">${fmt(r.amount)}</td>
+    </tr>`).join('');
+  document.getElementById('page-info').textContent=`Showing ${Math.min(start+1,total)}–${Math.min(start+PAGE_SIZE,total)} of ${total}`;
+  document.getElementById('table-meta').textContent=`${total} records`;
+  const btns=document.getElementById('pagination-btns');
+  btns.innerHTML='';
+  const addBtn=(label,pg,disabled,active)=>{
+    const b=document.createElement('button');
+    b.className='page-btn'+(active?' active':''); b.textContent=label; b.disabled=disabled;
+    b.onclick=()=>{currentPage=pg;renderTable();}; btns.appendChild(b);
   };
-  addBtn('← Prev', currentPage-1, currentPage===1, false);
-  let prev = null;
-  for (const p of pageRange(currentPage, pages)) {
-    if (prev !== null && p-prev > 1) {
-      const d = document.createElement('span');
-      d.textContent = '…'; d.style.cssText = 'padding:0 6px;color:var(--muted)';
-      btns.appendChild(d);
-    }
-    addBtn(p, p, false, p===currentPage);
-    prev = p;
+  addBtn('← Prev',currentPage-1,currentPage===1,false);
+  let prev=null;
+  for(const p of pageRange(currentPage,pages)){
+    if(prev!==null&&p-prev>1){const d=document.createElement('span');d.textContent='…';d.style.cssText='padding:0 5px;color:var(--muted)';btns.appendChild(d);}
+    addBtn(p,p,false,p===currentPage); prev=p;
   }
-  addBtn('Next →', currentPage+1, currentPage===pages||pages===0, false);
+  addBtn('Next →',currentPage+1,currentPage===pages||pages===0,false);
 }
-function pageRange(cur, total) {
-  if (total <= 7) return Array.from({length:total}, (_,i) => i+1);
-  const pages = new Set([1, total, cur]);
-  for (let d=-2; d<=2; d++) { const p=cur+d; if(p>=1&&p<=total) pages.add(p); }
-  return [...pages].sort((a,b)=>a-b);
+function pageRange(cur,total){
+  if(total<=7)return Array.from({length:total},(_,i)=>i+1);
+  const s=new Set([1,total,cur]);
+  for(let d=-2;d<=2;d++){const p=cur+d;if(p>=1&&p<=total)s.add(p);}
+  return[...s].sort((a,b)=>a-b);
 }
 
-/* ═══════════════════════════════════════════════════
-   PDF REPORT GENERATION
-═══════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   PDF EXPORT
+════════════════════════════════════════════════════ */
 async function downloadReport() {
-  const btn = document.getElementById('download-btn');
-  btn.disabled = true;
+  const btn=document.getElementById('download-btn');
+  btn.disabled=true;
   document.getElementById('pdf-overlay').classList.add('show');
-
   try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-    const PW = 210, PH = 297; // A4 mm
-    const ML = 15, MR = 15, MT = 15;
-    const CW = PW - ML - MR;
+    const{jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const PW=210,PH=297,ML=15,MR=15,MT=15,CW=PW-ML-MR;
+    const now=new Date();
+    const dStr=now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
 
-    // Collect stats from DOM
-    const statTotal   = document.getElementById('stat-total').textContent;
-    const statCount   = document.getElementById('stat-count').textContent;
-    const statLargest = document.getElementById('stat-largest').textContent;
-    const statLargestName = document.getElementById('stat-largest-name').textContent;
-    const statAvg     = document.getElementById('stat-avg').textContent;
-    const statTopCat  = document.getElementById('stat-top-cat').textContent;
-    const statTopAmt  = document.getElementById('stat-top-amount').textContent;
-
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-    const timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-
-    /* ── PAGE 1 ─────────────────────────────────── */
     // Header bar
-    doc.setFillColor(79, 70, 229);
-    doc.rect(0, 0, PW, 28, 'F');
+    doc.setFillColor(91,80,232); doc.rect(0,0,PW,28,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('ExpenseLens',ML+20,13);
+    doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text('Business Expense Report',ML+20,19);
+    doc.setFontSize(8); doc.text(`Generated: ${dStr}`,PW-MR,13,{align:'right'});
+    doc.text(document.getElementById('stat-count').textContent,PW-MR,19,{align:'right'});
 
-    // Logo placeholder (rounded rect)
-    doc.setFillColor(255,255,255,0.25);
-    doc.roundedRect(ML, 6, 16, 16, 3, 3, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(9);
-    doc.setFont('helvetica','bold');
-    doc.text('EL', ML+8, 16, { align:'center' });
+    let y=36;
+    // Summary title
+    doc.setTextColor(28,22,51); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text('EXPENSE SUMMARY',ML,y); doc.setDrawColor(232,226,217); doc.setLineWidth(.3);
+    doc.line(ML,y+2,PW-MR,y+2); y+=8;
 
-    // Title
-    doc.setFontSize(16);
-    doc.setFont('helvetica','bold');
-    doc.text('ExpenseLens', ML+20, 13);
-    doc.setFontSize(8);
-    doc.setFont('helvetica','normal');
-    doc.text('Business Expense Report', ML+20, 19);
-
-    // Date top-right
-    doc.setFontSize(8);
-    doc.text(`Generated: ${dateStr} at ${timeStr}`, PW-MR, 13, { align:'right' });
-    doc.text(`${statCount}`, PW-MR, 19, { align:'right' });
-
-    let y = 36;
-
-    // ── Summary section title
-    doc.setTextColor(30, 41, 59);
-    doc.setFontSize(10);
-    doc.setFont('helvetica','bold');
-    doc.text('EXPENSE SUMMARY', ML, y);
-    doc.setDrawColor(226,232,240);
-    doc.setLineWidth(0.3);
-    doc.line(ML, y+2, PW-MR, y+2);
-    y += 8;
-
-    // Stat cards (2x2 grid)
-    const cards = [
-      { label:'Total Expenses',  value: statTotal,   sub: statCount,       color:[79,70,229] },
-      { label:'Largest Expense', value: statLargest,  sub: statLargestName, color:[239,68,68] },
-      { label:'Average Expense', value: statAvg,      sub: 'per transaction',color:[16,185,129] },
-      { label:'Top Category',    value: statTopCat,   sub: statTopAmt,      color:[245,158,11] },
+    const cards=[
+      {label:'Total Expenses',value:document.getElementById('stat-total').textContent,sub:document.getElementById('stat-count').textContent,color:[91,80,232]},
+      {label:'Largest Expense',value:document.getElementById('stat-largest').textContent,sub:document.getElementById('stat-largest-name').textContent,color:[229,57,53]},
+      {label:'Average Expense',value:document.getElementById('stat-avg').textContent,sub:'per transaction',color:[18,183,106]},
+      {label:'Top Category',value:document.getElementById('stat-top-cat').textContent,sub:document.getElementById('stat-top-amount').textContent,color:[245,158,11]},
     ];
-    const cardW = (CW - 6) / 2;
-    const cardH = 22;
-    cards.forEach((c, i) => {
-      const cx = ML + (i % 2) * (cardW + 6);
-      const cy = y + Math.floor(i / 2) * (cardH + 6);
-      // Card background
-      doc.setFillColor(248, 250, 252);
-      doc.roundedRect(cx, cy, cardW, cardH, 3, 3, 'F');
-      // Accent bar
-      doc.setFillColor(...c.color);
-      doc.roundedRect(cx, cy, 3, cardH, 1.5, 1.5, 'F');
-      // Label
-      doc.setTextColor(100,116,139);
-      doc.setFontSize(6.5);
-      doc.setFont('helvetica','bold');
-      doc.text(c.label.toUpperCase(), cx+7, cy+6);
-      // Value
-      doc.setTextColor(30,41,59);
-      doc.setFontSize(12);
-      doc.setFont('helvetica','bold');
-      doc.text(c.value, cx+7, cy+13);
-      // Sub
-      doc.setTextColor(100,116,139);
-      doc.setFontSize(6.5);
-      doc.setFont('helvetica','normal');
-      doc.text(c.sub, cx+7, cy+19);
+    const cw=(CW-6)/2,ch=22;
+    cards.forEach((c,i)=>{
+      const cx=ML+(i%2)*(cw+6),cy=y+Math.floor(i/2)*(ch+6);
+      doc.setFillColor(243,239,233); doc.roundedRect(cx,cy,cw,ch,3,3,'F');
+      doc.setFillColor(...c.color); doc.roundedRect(cx,cy,3,ch,1.5,1.5,'F');
+      doc.setTextColor(107,98,128); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+      doc.text(c.label.toUpperCase(),cx+7,cy+6);
+      doc.setTextColor(28,22,51); doc.setFontSize(12); doc.setFont('helvetica','bold');
+      doc.text(c.value,cx+7,cy+13);
+      doc.setTextColor(107,98,128); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+      doc.text(c.sub,cx+7,cy+19);
     });
-    y += 2 * (cardH + 6) + 10;
+    y+=2*(ch+6)+10;
 
-    // ── Monthly Bar Chart
-    doc.setTextColor(30,41,59);
-    doc.setFontSize(10);
-    doc.setFont('helvetica','bold');
-    doc.text('MONTHLY SPENDING', ML, y);
-    doc.setDrawColor(226,232,240);
-    doc.line(ML, y+2, PW-MR, y+2);
-    y += 6;
+    // Bar chart
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(28,22,51);
+    doc.text('MONTHLY SPENDING',ML,y); doc.line(ML,y+2,PW-MR,y+2); y+=6;
+    const bc=document.getElementById('barChart');
+    const bi=await html2canvas(bc,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    const bAsp=bc.width/bc.height, bW=CW, bH=Math.min(bW/bAsp,65);
+    doc.addImage(bi.toDataURL('image/png'),'PNG',ML,y,bW,bH); y+=bH+10;
 
-    const barCanvas = document.getElementById('barChart');
-    const barImg = await html2canvas(barCanvas, { scale:2, backgroundColor:'#ffffff', useCORS:true });
-    const barData = barImg.toDataURL('image/png');
-    const barAspect = barCanvas.width / barCanvas.height;
-    const barW = CW, barH = barW / barAspect;
-    doc.addImage(barData, 'PNG', ML, y, barW, Math.min(barH, 65));
-    y += Math.min(barH, 65) + 10;
+    if(y+80>PH-20){doc.addPage();y=MT;}
+    doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text('CATEGORY BREAKDOWN',ML,y); doc.line(ML,y+2,PW-MR,y+2); y+=6;
+    const dc=document.getElementById('donutChart');
+    const di=await html2canvas(dc,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    const dAsp=dc.width/dc.height, dW=CW*.55, dH=Math.min(dW/dAsp,80);
+    doc.addImage(di.toDataURL('image/png'),'PNG',ML+(CW-dW)/2,y,dW,dH); y+=dH+10;
 
-    // ── Category Donut Chart (if space, else new page)
-    if (y + 80 > PH - 20) { doc.addPage(); y = MT; }
+    // Transactions
+    doc.addPage(); y=MT;
+    doc.setFillColor(91,80,232); doc.rect(0,0,PW,6,'F'); y=14;
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(28,22,51);
+    doc.text('ALL TRANSACTIONS',ML,y);
+    doc.setTextColor(107,98,128); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text(`${allRows.length} records`,PW-MR,y,{align:'right'});
+    doc.setDrawColor(232,226,217); doc.line(ML,y+2,PW-MR,y+2); y+=8;
 
-    doc.setTextColor(30,41,59);
-    doc.setFontSize(10);
-    doc.setFont('helvetica','bold');
-    doc.text('CATEGORY BREAKDOWN', ML, y);
-    doc.setDrawColor(226,232,240);
-    doc.line(ML, y+2, PW-MR, y+2);
-    y += 6;
+    const cols=[{label:'Date',w:28},{label:'Description',w:72},{label:'Category',w:45},{label:'Amount',w:30,r:true}];
+    const tw=cols.reduce((s,c)=>s+c.w,0);
+    const tx=ML+(CW-tw)/2, RH=7;
 
-    const donutCanvas = document.getElementById('donutChart');
-    const donutImg = await html2canvas(donutCanvas, { scale:2, backgroundColor:'#ffffff', useCORS:true });
-    const donutData = donutImg.toDataURL('image/png');
-    const donutAspect = donutCanvas.width / donutCanvas.height;
-    const donutW = CW * 0.55, donutH = donutW / donutAspect;
-    doc.addImage(donutData, 'PNG', ML + (CW - donutW)/2, y, donutW, Math.min(donutH, 80));
-    y += Math.min(donutH, 80) + 10;
-
-    /* ── PAGE 2+ — Transactions Table ─────────── */
-    doc.addPage();
-    y = MT;
-
-    // Page header accent
-    doc.setFillColor(79,70,229);
-    doc.rect(0, 0, PW, 6, 'F');
-    y = 14;
-
-    doc.setTextColor(30,41,59);
-    doc.setFontSize(10);
-    doc.setFont('helvetica','bold');
-    doc.text('ALL TRANSACTIONS', ML, y);
-    doc.setTextColor(100,116,139);
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica','normal');
-    doc.text(`${allRows.length} records`, PW-MR, y, { align:'right' });
-    doc.setDrawColor(226,232,240);
-    doc.setLineWidth(0.3);
-    doc.line(ML, y+2, PW-MR, y+2);
-    y += 8;
-
-    // Table header
-    const cols = [
-      { label:'Date',         w:28,  align:'left'  },
-      { label:'Description',  w:72,  align:'left'  },
-      { label:'Category',     w:45,  align:'left'  },
-      { label:'Amount',       w:30,  align:'right' },
-    ];
-    const totalColW = cols.reduce((s,c) => s+c.w, 0);
-    const tableX    = ML + (CW - totalColW) / 2;
-    const ROW_H     = 7;
-
-    const drawTableHeader = (yPos) => {
-      doc.setFillColor(241,245,249);
-      doc.rect(tableX, yPos-4, totalColW, ROW_H, 'F');
-      let x = tableX;
-      doc.setFontSize(6.5);
-      doc.setFont('helvetica','bold');
-      doc.setTextColor(100,116,139);
-      for (const col of cols) {
-        const tx = col.align === 'right' ? x+col.w-2 : x+2;
-        doc.text(col.label.toUpperCase(), tx, yPos, { align: col.align === 'right' ? 'right' : 'left' });
-        x += col.w;
-      }
-      doc.setDrawColor(226,232,240);
-      doc.setLineWidth(0.25);
-      doc.line(tableX, yPos+2, tableX+totalColW, yPos+2);
+    const drawTH=(yp)=>{
+      doc.setFillColor(243,239,233); doc.rect(tx,yp-4,tw,RH,'F');
+      let x=tx; doc.setFontSize(6.5); doc.setFont('helvetica','bold'); doc.setTextColor(107,98,128);
+      for(const c of cols){ doc.text(c.label.toUpperCase(),c.r?x+c.w-2:x+2,yp,{align:c.r?'right':'left'}); x+=c.w; }
+      doc.setDrawColor(232,226,217); doc.line(tx,yp+2,tx+tw,yp+2);
     };
+    drawTH(y); y+=RH;
 
-    drawTableHeader(y);
-    y += ROW_H;
+    const hR=(h)=>{const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h); return r?[parseInt(r[1],16),parseInt(r[2],16),parseInt(r[3],16)]:[91,80,232];};
+    const ci2={};let pci=0;
+    for(const r of allRows) if(!ci2[r.category]) ci2[r.category]=PALETTE[(pci++)%PALETTE.length];
 
-    const palette = ['#4f46e5','#7c3aed','#db2777','#dc2626','#d97706','#65a30d','#0891b2','#0284c7','#84cc16','#f97316'];
-    const catColors = {};
-    let colorIdx = 0;
-    for (const r of allRows) {
-      if (!catColors[r.category]) catColors[r.category] = palette[(colorIdx++) % palette.length];
-    }
-
-    const hexToRgb = (hex) => {
-      const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return res ? [parseInt(res[1],16), parseInt(res[2],16), parseInt(res[3],16)] : [79,70,229];
-    };
-
-    let rowIdx = 0;
-    for (const r of allRows) {
-      if (y + ROW_H > PH - 16) {
-        // Page footer
-        doc.setFontSize(6.5); doc.setTextColor(180,180,180);
-        doc.text(`ExpenseLens Report  •  Page ${doc.internal.getCurrentPageInfo().pageNumber}`, PW/2, PH-8, { align:'center' });
-        doc.addPage();
-        doc.setFillColor(79,70,229);
-        doc.rect(0, 0, PW, 6, 'F');
-        y = 14;
-        drawTableHeader(y);
-        y += ROW_H;
-        rowIdx = 0;
+    let ri=0;
+    for(const r of allRows){
+      if(y+RH>PH-16){
+        doc.setFontSize(6.5);doc.setTextColor(180,180,180);
+        doc.text(`ExpenseLens Report  •  Page ${doc.internal.getCurrentPageInfo().pageNumber}`,PW/2,PH-8,{align:'center'});
+        doc.addPage(); doc.setFillColor(91,80,232); doc.rect(0,0,PW,6,'F'); y=14;
+        drawTH(y); y+=RH; ri=0;
       }
-
-      // Alternating row background
-      if (rowIdx % 2 === 0) {
-        doc.setFillColor(249,250,251);
-        doc.rect(tableX, y-4, totalColW, ROW_H, 'F');
-      }
-
-      let x = tableX;
-      doc.setFontSize(7);
-      doc.setFont('helvetica','normal');
-      doc.setTextColor(30,41,59);
-
-      // Date
-      doc.text(r.date || '—', x+2, y);
-      x += cols[0].w;
-
-      // Description (truncate)
-      const maxNameChars = 42;
-      const nameText = r.name.length > maxNameChars ? r.name.slice(0,maxNameChars)+'…' : r.name;
-      doc.text(nameText, x+2, y);
-      x += cols[1].w;
-
-      // Category chip
-      const catColor = hexToRgb(catColors[r.category] || '#4f46e5');
-      doc.setFillColor(catColor[0], catColor[1], catColor[2], 0.12);
-      const chipW = Math.min(cols[2].w - 4, doc.getStringUnitWidth(r.category) * 7 / doc.internal.scaleFactor + 6);
-      doc.roundedRect(x+2, y-3.5, chipW, 5, 1.5, 1.5, 'F');
-      doc.setTextColor(catColor[0], catColor[1], catColor[2]);
-      doc.setFontSize(6.2);
-      doc.text(r.category.length > 16 ? r.category.slice(0,16)+'…' : r.category, x+4, y);
-      x += cols[2].w;
-
-      // Amount
-      doc.setFontSize(7);
-      doc.setFont('helvetica','bold');
-      doc.setTextColor(220, 38, 38);
-      doc.text(fmt(r.amount), x+cols[3].w-2, y, { align:'right' });
-
-      // Row separator
-      doc.setDrawColor(241,245,249);
-      doc.setLineWidth(0.2);
-      doc.line(tableX, y+2.5, tableX+totalColW, y+2.5);
-
-      y += ROW_H;
-      rowIdx++;
+      if(ri%2===0){doc.setFillColor(249,247,245);doc.rect(tx,y-4,tw,RH,'F');}
+      let x=tx;
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(28,22,51);
+      doc.text(r.date||'—',x+2,y); x+=cols[0].w;
+      const nm=r.name.length>42?r.name.slice(0,42)+'…':r.name;
+      doc.text(nm,x+2,y); x+=cols[1].w;
+      const cc=hR(ci2[r.category]||'#5b50e8');
+      doc.setFillColor(cc[0],cc[1],cc[2],.15);
+      const chipW=Math.min(cols[2].w-4,doc.getStringUnitWidth(r.category)*7/doc.internal.scaleFactor+6);
+      doc.roundedRect(x+2,y-3.5,chipW,5,1.5,1.5,'F');
+      doc.setTextColor(cc[0],cc[1],cc[2]); doc.setFontSize(6.2);
+      doc.text(r.category.length>16?r.category.slice(0,16)+'…':r.category,x+4,y); x+=cols[2].w;
+      doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(229,57,53);
+      doc.text(fmt(r.amount),x+cols[3].w-2,y,{align:'right'});
+      doc.setDrawColor(240,235,228);doc.line(tx,y+2.5,tx+tw,y+2.5);
+      y+=RH; ri++;
     }
-
-    // Last page footer
-    doc.setFontSize(6.5);
-    doc.setTextColor(180,180,180);
-    doc.text(`ExpenseLens Report  •  Page ${doc.internal.getCurrentPageInfo().pageNumber}`, PW/2, PH-8, { align:'center' });
-
-    // Save
+    doc.setFontSize(6.5);doc.setTextColor(180,180,180);
+    doc.text(`ExpenseLens Report  •  Page ${doc.internal.getCurrentPageInfo().pageNumber}`,PW/2,PH-8,{align:'center'});
     doc.save(`ExpenseLens-Report-${now.toISOString().slice(0,10)}.pdf`);
-  } catch (err) {
-    console.error(err);
-    alert('PDF generation failed: ' + err.message);
-  } finally {
-    document.getElementById('pdf-overlay').classList.remove('show');
-    btn.disabled = false;
-  }
+  } catch(err){ console.error(err); alert('PDF error: '+err.message); }
+  finally{ document.getElementById('pdf-overlay').classList.remove('show'); btn.disabled=false; }
 }
 
-/* ═══════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════
    HELPERS
-═══════════════════════════════════════════════════ */
-function fmt(n) {
-  return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', minimumFractionDigits:2 }).format(n);
-}
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function showLoader() {
-  document.getElementById('upload-section').style.display = 'none';
-  document.getElementById('loader').style.display         = 'block';
-}
-function hideLoader() { document.getElementById('loader').style.display = 'none'; }
-function resetApp() {
-  allRows = []; filtered = []; rawHeaders = []; rawData = [];
-  currentPage = 1;
-  document.getElementById('dashboard').style.display          = 'none';
-  document.getElementById('upload-section').style.display     = '';
-  document.getElementById('column-map-banner').style.display  = 'none';
-  document.getElementById('reset-btn').style.display          = 'none';
-  document.getElementById('download-btn').style.display       = 'none';
-  document.getElementById('file-input').value                 = '';
-  document.getElementById('search-input').value               = '';
-  if (barChartInst)   { barChartInst.destroy();   barChartInst   = null; }
-  if (donutChartInst) { donutChartInst.destroy(); donutChartInst = null; }
+════════════════════════════════════════════════════ */
+function fmt(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2}).format(n); }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showLoader(){ document.getElementById('upload-section').style.display='none'; document.getElementById('loader').style.display='block'; }
+function hideLoader(){ document.getElementById('loader').style.display='none'; }
+
+function resetApp(){
+  allRows=[];filtered=[];rawHeaders=[];rawData=[];currentPage=1;
+  compareFiles={a:null,b:null};
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('upload-section').style.display='';
+  document.getElementById('column-map-banner').style.display='none';
+  document.getElementById('reset-btn').style.display='none';
+  document.getElementById('download-btn').style.display='none';
+  document.getElementById('file-input').value='';
+  document.getElementById('search-input').value='';
+  ['slot-a','slot-b'].forEach(id=>{
+    document.getElementById(id).classList.remove('loaded');
+    document.getElementById(id.replace('slot-','slot-')+'-name').textContent='';
+  });
+  document.getElementById('comparison-results').innerHTML='';
+  if(barChartInst){barChartInst.destroy();barChartInst=null;}
+  if(donutChartInst){donutChartInst.destroy();donutChartInst=null;}
+  if(gaugeChartInst){gaugeChartInst.destroy();gaugeChartInst=null;}
+  switchTab('overview',document.querySelector('.dash-tab'));
 }
 </script>
 </body>
