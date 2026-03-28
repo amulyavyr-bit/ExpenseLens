@@ -461,66 +461,112 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
 
 /* ═══ PRICING MODAL ═══ */
 .modal-backdrop{
-  display:none;position:fixed;inset:0;background:rgba(28,22,51,.6);
-  backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;
-  padding:24px;
+  display:none;position:fixed;inset:0;background:rgba(16,12,38,.72);
+  backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center;
+  padding:24px;overflow-y:auto;
 }
-.modal-backdrop.open{display:flex;animation:fadeIn .2s ease}
+.modal-backdrop.open{display:flex;animation:fadeIn .22s ease}
 .pricing-modal{
-  background:var(--surface);border-radius:24px;padding:40px;
-  max-width:760px;width:100%;box-shadow:var(--shadow-lg);
+  background:var(--surface);border-radius:26px;padding:44px 40px 40px;
+  max-width:820px;width:100%;box-shadow:0 32px 80px rgba(28,22,51,.22),0 2px 0 #fff inset;
   border:1px solid var(--border-light);position:relative;
-  animation:slideUp .3s ease;
+  animation:slideUp .32s cubic-bezier(.22,.68,0,1.2);
 }
-@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideUp{from{transform:translateY(32px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-close{
-  position:absolute;top:18px;right:18px;
-  width:32px;height:32px;border-radius:50%;border:1px solid var(--border);
-  background:var(--bg);cursor:pointer;font-size:1rem;
+  position:absolute;top:20px;right:20px;
+  width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);
+  background:var(--bg);cursor:pointer;font-size:.95rem;
   display:flex;align-items:center;justify-content:center;color:var(--muted);
-  transition:all .15s;
+  transition:all .15s;z-index:2;
 }
 .modal-close:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
-.modal-header{text-align:center;margin-bottom:32px}
-.modal-header h2{font-size:1.6rem;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
-.modal-header p{font-size:.9rem;color:var(--muted)}
-.plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:520px){.plans-grid{grid-template-columns:1fr}}
-.plan-card{
-  border:2px solid var(--border);border-radius:18px;padding:28px;
-  transition:all .2s;position:relative;overflow:hidden;
+
+/* header */
+.pricing-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,#ede9fe,#dbeafe);
+  color:var(--primary);font-size:.72rem;font-weight:800;
+  padding:4px 14px;border-radius:99px;margin-bottom:14px;
+  letter-spacing:.07em;text-transform:uppercase;
 }
+.modal-header{text-align:center;margin-bottom:36px}
+.modal-header h2{font-size:1.75rem;font-weight:900;letter-spacing:-.04em;margin-bottom:8px;line-height:1.15}
+.modal-header h2 em{font-style:normal;background:linear-gradient(135deg,var(--primary),#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.modal-header p{font-size:.88rem;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.55}
+
+/* grid */
+.plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
+@media(max-width:560px){.plans-grid{grid-template-columns:1fr}}
+
+/* cards */
+.plan-card{
+  border:2px solid var(--border);border-radius:20px;padding:30px 26px;
+  transition:all .22s;position:relative;overflow:hidden;display:flex;flex-direction:column;
+  background:#fff;
+}
+.plan-card:not(.recommended):hover{border-color:var(--primary-light);box-shadow:0 6px 24px rgba(91,80,232,.08)}
 .plan-card.recommended{
   border-color:var(--primary);
-  background:linear-gradient(180deg,var(--primary-light) 0%,#fff 60%);
+  background:linear-gradient(160deg,#f5f3ff 0%,#fff 55%);
+  box-shadow:0 12px 40px rgba(91,80,232,.16);
 }
 .plan-card-badge{
-  position:absolute;top:16px;right:16px;
-  background:var(--primary);color:#fff;
-  font-size:.65rem;font-weight:800;padding:3px 10px;border-radius:99px;
-  text-transform:uppercase;letter-spacing:.05em;
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--primary),#8b5cf6);color:#fff;
+  font-size:.65rem;font-weight:800;padding:4px 16px;border-radius:0 0 12px 12px;
+  text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;
+  box-shadow:0 4px 12px rgba(91,80,232,.3);
 }
-.plan-name{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-.plan-price{font-size:2.4rem;font-weight:900;letter-spacing:-.04em;color:var(--text)}
-.plan-price span{font-size:.9rem;font-weight:500;color:var(--muted)}
-.plan-desc{font-size:.82rem;color:var(--muted);margin:10px 0 20px;line-height:1.5}
-.plan-features{list-style:none;margin-bottom:24px}
+.plan-name{font-size:.75rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;margin-top:8px}
+.plan-price{font-size:2.6rem;font-weight:900;letter-spacing:-.05em;color:var(--text);line-height:1}
+.plan-price span{font-size:.88rem;font-weight:500;color:var(--muted)}
+.plan-price-sub{font-size:.75rem;color:var(--muted);margin:6px 0 0;min-height:18px}
+.plan-divider{height:1px;background:var(--border);margin:18px 0}
+.plan-desc{font-size:.82rem;color:var(--muted);margin-bottom:18px;line-height:1.55}
+.plan-features{list-style:none;margin-bottom:0;flex:1}
 .plan-features li{
-  display:flex;align-items:flex-start;gap:8px;
-  font-size:.83rem;color:var(--text2);padding:5px 0;
+  display:flex;align-items:flex-start;gap:9px;
+  font-size:.83rem;color:var(--text2);padding:6px 0;line-height:1.4;
+  border-bottom:1px solid var(--border);
 }
-.plan-features li::before{
-  content:'✓';font-weight:800;flex-shrink:0;margin-top:1px;
-}
-.plan-card:not(.recommended) .plan-features li::before{color:var(--muted)}
-.plan-card.recommended .plan-features li::before{color:var(--primary)}
+.plan-features li:last-child{border-bottom:none}
+.plan-features li .feat-icon{flex-shrink:0;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;margin-top:1px}
+.plan-card:not(.recommended) .plan-features li .feat-icon{background:var(--bg2);color:var(--muted)}
+.plan-card.recommended .plan-features li .feat-icon{background:linear-gradient(135deg,var(--primary),#8b5cf6);color:#fff}
+.plan-features li .feat-icon.f-locked{background:var(--bg2) !important;color:var(--border) !important}
 .plan-features li.locked{color:var(--muted-light)}
-.plan-features li.locked::before{content:'—';color:var(--border)}
-.plan-btn{width:100%;padding:13px;border-radius:11px;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:inherit}
-.plan-btn-free{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
-.plan-btn-free:hover{border-color:var(--primary);color:var(--primary)}
-.plan-btn-pro{background:linear-gradient(135deg,var(--primary),#8b5cf6);color:#fff;box-shadow:0 4px 16px rgba(91,80,232,.3)}
-.plan-btn-pro:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,80,232,.4)}
+.plan-features li .feat-text{flex:1}
+.plan-features li .feat-badge{font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:6px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;flex-shrink:0;align-self:center}
+
+/* guarantee strip */
+.plan-guarantee{
+  text-align:center;margin-top:22px;font-size:.75rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+
+/* CTA buttons */
+.plan-cta-area{margin-top:22px}
+.plan-btn{
+  width:100%;padding:14px;border-radius:13px;font-size:.9rem;font-weight:800;
+  cursor:pointer;border:none;transition:all .2s;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;
+}
+.plan-btn-free{background:var(--bg2);color:var(--text);border:1.5px solid var(--border)}
+.plan-btn-free:hover{border-color:var(--primary);color:var(--primary);background:#fff}
+.plan-btn-pro{
+  background:linear-gradient(135deg,var(--primary) 0%,#8b5cf6 100%);
+  color:#fff;box-shadow:0 6px 20px rgba(91,80,232,.35);
+  position:relative;overflow:hidden;
+}
+.plan-btn-pro::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.15) 50%,transparent 100%);
+  transform:translateX(-100%);transition:transform .6s ease;
+}
+.plan-btn-pro:hover::after{transform:translateX(100%)}
+.plan-btn-pro:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(91,80,232,.45)}
+.plan-btn-pro:active{transform:translateY(0)}
 
 /* ── PDF Overlay ── */
 #pdf-overlay{
@@ -946,46 +992,129 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
   <div class="pricing-modal">
     <button class="modal-close" onclick="closePricing()">✕</button>
     <div class="modal-header">
-      <h2>Choose your plan</h2>
-      <p>Unlock the full power of ExpenseLens with Pro — AI insights, forecasting, and more.</p>
+      <div class="pricing-eyebrow">✦ Simple, transparent pricing</div>
+      <h2>Start free. Scale with <em>Pro</em>.</h2>
+      <p>Powerful expense analytics for growing businesses — from basic dashboards to advanced AI-driven financial intelligence.</p>
     </div>
     <div class="plans-grid">
+
+      <!-- FREE PLAN -->
       <div class="plan-card">
         <div class="plan-name">Free</div>
         <div class="plan-price">$0 <span>/ month</span></div>
-        <div class="plan-desc">Perfect for individuals and small teams getting started with expense tracking.</div>
+        <div class="plan-price-sub">No credit card required</div>
+        <div class="plan-divider"></div>
+        <div class="plan-desc">Upload your expenses and get instant visual insights with a clean interactive dashboard.</div>
         <ul class="plan-features">
-          <li>Upload Excel, CSV, XLS files</li>
-          <li>Interactive dashboard &amp; charts</li>
-          <li>Basic PDF export</li>
-          <li>Transactions table with search</li>
-          <li>2 AI insights per report</li>
-          <li class="locked">Full AI financial insights</li>
-          <li class="locked">Business health score</li>
-          <li class="locked">Expense forecasting</li>
-          <li class="locked">Multi-file comparison</li>
-          <li class="locked">Report history</li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Upload Excel, CSV &amp; XLS files</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Auto column detection</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Interactive charts &amp; full dashboard</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">PDF report export</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Basic business recommendations</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Monthly insights</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Save history <span class="feat-badge">5 reports</span></span>
+          </li>
+          <li class="locked">
+            <span class="feat-icon f-locked">—</span>
+            <span class="feat-text">Advanced AI recommendations</span>
+          </li>
+          <li class="locked">
+            <span class="feat-icon f-locked">—</span>
+            <span class="feat-text">Expense forecasting</span>
+          </li>
+          <li class="locked">
+            <span class="feat-icon f-locked">—</span>
+            <span class="feat-text">Multi-file comparison</span>
+          </li>
         </ul>
-        <button class="plan-btn plan-btn-free" onclick="closePricing()">Stay on Free</button>
+        <div class="plan-cta-area">
+          <button class="plan-btn plan-btn-free" onclick="closePricing()">Continue with Free</button>
+        </div>
       </div>
+
+      <!-- PRO PLAN -->
       <div class="plan-card recommended">
-        <div class="plan-card-badge">Most Popular</div>
+        <div class="plan-card-badge">✦ Most Popular</div>
         <div class="plan-name">Pro</div>
-        <div class="plan-price">$29 <span>/ month</span></div>
-        <div class="plan-desc">Everything you need to truly understand and optimize your business spending.</div>
+        <div class="plan-price">$19 <span>/ month</span></div>
+        <div class="plan-price-sub" style="color:var(--primary);font-weight:600">Cancel anytime · instant access</div>
+        <div class="plan-divider"></div>
+        <div class="plan-desc">Everything in Free plus the AI tools your business needs to cut costs and grow smarter.</div>
         <ul class="plan-features">
-          <li>Everything in Free</li>
-          <li>Unlimited file uploads</li>
-          <li>Full AI financial insights</li>
-          <li>Business health score</li>
-          <li>Expense forecasting</li>
-          <li>Multi-file comparison</li>
-          <li>Save &amp; manage report history</li>
-          <li>Advanced PDF reports</li>
-          <li>Priority support</li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Everything in Free</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Advanced AI business recommendations</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Expense forecasting &amp; trends</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Smart alerts &amp; anomaly detection</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Unlimited report history</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Profit &amp; margin analysis</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Cost leak detection</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Multi-file comparison</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">AI financial advisor</span>
+          </li>
+          <li>
+            <span class="feat-icon">✓</span>
+            <span class="feat-text">Priority processing</span>
+          </li>
         </ul>
-        <button class="plan-btn plan-btn-pro" onclick="activatePro()">✦ Go Pro — Demo Unlock</button>
+        <div class="plan-cta-area">
+          <a class="plan-btn plan-btn-pro"
+             href="https://expenselenspro.lemonsqueezy.com/checkout/buy/33a49186-fbbd-4af9-9ca0-7cd8ecf1d5e3"
+             target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Upgrade to Pro — $19/month
+          </a>
+        </div>
       </div>
+    </div>
+    <div class="plan-guarantee">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+      Secure checkout via Lemon Squeezy &nbsp;·&nbsp; 30-day money-back guarantee &nbsp;·&nbsp; Cancel anytime
     </div>
   </div>
 </div>
@@ -1282,10 +1411,10 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
         <div class="tub-info">
           <div class="tub-label">
             <span>📁 Saved Reports</span>
-            <span class="tub-count" id="tub-count-text">0 / 3</span>
+            <span class="tub-count" id="tub-count-text">0 / 5</span>
           </div>
           <div class="tub-track"><div class="tub-fill f-ok" id="tub-fill" style="width:0%"></div></div>
-          <div class="tub-sub" id="tub-sub-text">Free plan · 3 reports maximum</div>
+          <div class="tub-sub" id="tub-sub-text">Free plan · 5 reports maximum</div>
         </div>
         <button class="btn btn-pro btn-sm" onclick="openPricing()" id="tub-upgrade-btn" style="display:none">✦ Upgrade</button>
       </div>
@@ -1364,7 +1493,7 @@ let currentFileName = '';
 let compareFiles = { a: null, b: null };
 
 // My Reports state
-const FREE_REPORT_LIMIT = 3;
+const FREE_REPORT_LIMIT = 5;
 let selectedReportIds   = [];   // for cross-report comparison
 let cachedReports       = [];   // last loaded reports list
 
