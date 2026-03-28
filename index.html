@@ -545,7 +545,169 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
 /* ── Divider ── */
 .dash-divider{height:1px;background:var(--border);margin:28px 0}
 
+/* ══════════════════════════════════════
+   MY REPORTS
+══════════════════════════════════════ */
+.reports-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:14px;margin-bottom:24px;
+}
+.report-card{
+  background:var(--surface);border-radius:var(--radius);padding:22px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  cursor:pointer;transition:all .2s;position:relative;
+  display:flex;flex-direction:column;gap:8px;
+}
+.report-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--primary-mid)}
+.report-card.selected{border-color:var(--primary);background:var(--primary-light);box-shadow:0 0 0 2px var(--primary-mid)}
+.report-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.report-card-name{font-size:.95rem;font-weight:700;color:var(--text);line-height:1.3;flex:1}
+.report-card-file{font-size:.73rem;color:var(--muted-light);font-weight:500;margin-top:2px}
+.report-card-date{font-size:.72rem;color:var(--muted-light);white-space:nowrap;margin-top:2px}
+.report-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0}
+.rcs-item{background:var(--bg);border-radius:8px;padding:8px 10px}
+.rcs-label{font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.rcs-value{font-size:.9rem;font-weight:800;color:var(--text);margin-top:2px}
+.report-card-cat{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--primary-light);color:var(--primary);
+  padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:700;
+}
+.report-card-actions{display:flex;gap:6px;margin-top:6px}
+.btn-rc{
+  flex:1;padding:7px 10px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;font-size:.78rem;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.btn-rc-load{color:var(--primary)}
+.btn-rc-load:hover{background:var(--primary-light);border-color:var(--primary-mid)}
+.btn-rc-del{color:var(--muted)}
+.btn-rc-del:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+.btn-rc-compare{color:var(--amber)}
+.btn-rc-compare:hover{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Skeleton Loading ── */
+.skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--border-light) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:var(--surface);border-radius:var(--radius);padding:22px;border:1px solid var(--border-light)}
+.skel-line{height:12px;margin-bottom:10px}
+.skel-line.wide{width:70%}
+.skel-line.short{width:40%}
+
+/* ── Empty State ── */
+.empty-state{
+  text-align:center;padding:64px 24px;
+  background:var(--surface);border-radius:var(--radius);border:1px solid var(--border-light);
+}
+.empty-icon{font-size:3rem;margin-bottom:16px}
+.empty-title{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:8px}
+.empty-sub{font-size:.85rem;color:var(--muted);max-width:320px;margin:0 auto 20px;line-height:1.6}
+
+/* ── Save Report Modal ── */
+.save-modal{max-width:480px}
+.save-modal .modal-header{text-align:left;margin-bottom:20px}
+.save-modal .modal-header h2{font-size:1.2rem}
+.save-modal .modal-header p{font-size:.85rem;color:var(--muted)}
+.save-summary{
+  background:var(--bg);border-radius:12px;padding:16px;margin-bottom:20px;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.ss-item{display:flex;flex-direction:column;gap:2px}
+.ss-label{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.ss-value{font-size:.88rem;font-weight:700;color:var(--text)}
+
+/* ── Compare Strip ── */
+.compare-strip{
+  background:linear-gradient(135deg,var(--primary-light),var(--amber-bg));
+  border:1px solid var(--primary-mid);border-radius:12px;padding:14px 18px;
+  margin-bottom:20px;display:flex;align-items:center;gap:12px;
+}
+.cs-text{flex:1;font-size:.85rem;color:var(--text2)}
+.cs-text strong{color:var(--primary)}
+
+/* ── Free Tier Usage Bar ── */
+.tier-usage-bar{
+  background:var(--surface);border:1px solid var(--border-light);border-radius:12px;
+  padding:14px 18px;margin-bottom:18px;
+  display:flex;align-items:center;gap:14px;
+}
+.tub-info{flex:1}
+.tub-label{font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.tub-count{font-size:.75rem;font-weight:700}
+.tub-count.at-limit{color:var(--red)}
+.tub-count.near-limit{color:var(--amber)}
+.tub-count.ok{color:var(--green)}
+.tub-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.tub-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.tub-fill.f-ok{background:var(--green)}
+.tub-fill.f-near{background:var(--amber)}
+.tub-fill.f-limit{background:var(--red)}
+.tub-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+
+/* ── Upgrade Prompt Card ── */
+.upgrade-prompt-card{
+  background:linear-gradient(135deg,#fff8f0,#fef3f2);
+  border:1.5px solid #fcd34d;border-radius:var(--radius);padding:28px;
+  text-align:center;margin-bottom:20px;
+}
+.upc-icon{font-size:2.5rem;margin-bottom:12px}
+.upc-title{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-.01em}
+.upc-sub{font-size:.85rem;color:var(--muted);max-width:380px;margin:0 auto 20px;line-height:1.55}
+.upc-features{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:20px;
+}
+.upc-feat{
+  background:#fff;border:1px solid var(--border);border-radius:99px;
+  padding:4px 12px;font-size:.75rem;font-weight:600;color:var(--text2);
+}
+
+/* ── Pro Feature Lock in Cards ── */
+.pro-lock-row{
+  background:var(--bg);border:1px dashed var(--border);border-radius:10px;
+  padding:12px 16px;display:flex;align-items:center;gap:10px;margin-top:8px;
+}
+.pro-lock-row .lock-icon{font-size:1.1rem;flex-shrink:0}
+.pro-lock-row .lock-text{font-size:.78rem;color:var(--muted);flex:1}
+.pro-lock-row .lock-text strong{color:var(--text2);font-weight:700}
+
+/* ── Save Modal Tier Warning ── */
+.save-limit-warning{
+  background:linear-gradient(135deg,#fffbeb,#fef3c7);
+  border:1.5px solid var(--amber-border);border-radius:12px;
+  padding:18px 20px;text-align:center;
+}
+.slw-icon{font-size:2rem;margin-bottom:10px}
+.slw-title{font-size:.95rem;font-weight:800;color:#92400e;margin-bottom:6px}
+.slw-sub{font-size:.82rem;color:#78350f;line-height:1.5;margin-bottom:14px}
+
+/* ── DB Setup Notice ── */
+.db-setup-notice{
+  background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;
+  padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;
+}
+.db-setup-notice .dsn-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px}
+.db-setup-notice .dsn-body h4{font-size:.88rem;font-weight:700;color:#78350f;margin-bottom:4px}
+.db-setup-notice .dsn-body p{font-size:.8rem;color:#92400e;line-height:1.5}
+.dsn-sql{
+  background:#1e1633;color:#e2e8f0;font-size:.72rem;border-radius:8px;
+  padding:12px;margin-top:10px;font-family:monospace;white-space:pre;
+  overflow-x:auto;max-height:160px;line-height:1.5;
+}
+.dsn-copy{
+  margin-top:8px;padding:5px 12px;border-radius:7px;font-size:.75rem;font-weight:600;
+  cursor:pointer;border:1px solid var(--amber-border);background:var(--surface);color:#78350f;
+  font-family:inherit;transition:all .15s;
+}
+.dsn-copy:hover{background:var(--amber-border)}
+
 /* ── Responsive ── */
+@media(max-width:640px){
+  header{padding:0 16px}
+  main{padding:20px 16px}
+  .logo-text span{display:none}
+  .btn-pro .btn-label{display:none}
+  #upload-section{padding:48px 20px}
+}
 @media(max-width:640px){
   header{padding:0 16px}
   main{padding:20px 16px}
@@ -755,6 +917,10 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
   <div class="header-sep"></div>
   <div class="header-actions">
     <span class="plan-badge" id="plan-badge">Free Plan</span>
+    <button class="btn btn-ghost btn-sm" id="save-report-btn" style="display:none" onclick="openSaveModal()">
+      <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+      Save Report
+    </button>
     <button class="btn btn-ghost btn-sm" id="download-btn" style="display:none" onclick="downloadReport()">
       <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       Export PDF
@@ -824,6 +990,29 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
   </div>
 </div>
 
+<!-- ═══ SAVE REPORT MODAL ═══ -->
+<div class="modal-backdrop" id="save-modal" onclick="if(event.target===this)closeSaveModal()">
+  <div class="pricing-modal save-modal">
+    <button class="modal-close" onclick="closeSaveModal()">✕</button>
+    <div class="modal-header">
+      <h2>💾 Save Report</h2>
+      <p>Save this analysis to your account so you can access it anytime.</p>
+    </div>
+    <div class="save-summary" id="save-summary-preview"></div>
+    <div class="form-group">
+      <label class="form-label" for="report-name-input">Report name</label>
+      <input class="form-input" id="report-name-input" type="text" placeholder="e.g. Q1 2025 Expenses" maxlength="80"
+             onkeydown="if(event.key==='Enter')doSaveReport()"/>
+    </div>
+    <div class="auth-error" id="save-error"></div>
+    <div class="auth-success" id="save-success"></div>
+    <button class="auth-btn" id="do-save-btn" onclick="doSaveReport()" style="margin-top:12px">
+      <div class="btn-spinner"></div>
+      <span class="btn-text">Save to My Reports →</span>
+    </button>
+  </div>
+</div>
+
 <!-- ═══ PDF OVERLAY ═══ -->
 <div id="pdf-overlay">
   <div class="pdf-toast">
@@ -889,6 +1078,9 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
       </button>
       <button class="dash-tab" onclick="isPro?switchTab('compare',this):openPricing()">
         🔀 Compare <span class="tab-pro" id="compare-tab-pro">PRO</span>
+      </button>
+      <button class="dash-tab" onclick="switchTab('reports',this);loadMyReports()">
+        📁 My Reports
       </button>
     </div>
 
@@ -1067,6 +1259,79 @@ tbody td{padding:13px 20px;font-size:.875rem;color:var(--text2)}
       <div id="comparison-results"></div>
     </div>
 
+    <!-- ── Tab: My Reports ── -->
+    <div class="tab-panel" id="tab-reports">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-icon si-amber">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V6h5.17l2 2H20v10z"/></svg>
+          </div>
+          <h2>My Reports</h2>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="reports-count-badge" style="font-size:.78rem;color:var(--muted)"></span>
+          <button class="btn btn-ghost btn-sm" onclick="loadMyReports()">
+            <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Free Tier Usage Bar (hidden for Pro) -->
+      <div class="tier-usage-bar" id="tier-usage-bar" style="display:none">
+        <div class="tub-info">
+          <div class="tub-label">
+            <span>📁 Saved Reports</span>
+            <span class="tub-count" id="tub-count-text">0 / 3</span>
+          </div>
+          <div class="tub-track"><div class="tub-fill f-ok" id="tub-fill" style="width:0%"></div></div>
+          <div class="tub-sub" id="tub-sub-text">Free plan · 3 reports maximum</div>
+        </div>
+        <button class="btn btn-pro btn-sm" onclick="openPricing()" id="tub-upgrade-btn" style="display:none">✦ Upgrade</button>
+      </div>
+
+      <!-- DB Setup Notice -->
+      <div class="db-setup-notice" id="db-setup-notice" style="display:none">
+        <div class="dsn-icon">⚙️</div>
+        <div class="dsn-body">
+          <h4>One-time database setup required</h4>
+          <p>To enable report saving, run this SQL in your <strong>Supabase SQL Editor</strong> (Database → SQL Editor → New query):</p>
+          <div class="dsn-sql" id="setup-sql-block"></div>
+          <button class="dsn-copy" onclick="copySql()">📋 Copy SQL</button>
+          <p style="margin-top:8px">After running the SQL, click Refresh above.</p>
+        </div>
+      </div>
+
+      <!-- Compare strip (appears when 2 selected) -->
+      <div class="compare-strip" id="compare-strip" style="display:none">
+        <span class="cs-text">✓ <strong id="cs-names"></strong> selected — ready to compare</span>
+        <button class="btn btn-primary btn-sm" onclick="compareSelectedReports()">Compare Now →</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearCompareSelection()">✕ Clear</button>
+      </div>
+
+      <!-- Loading skeletons -->
+      <div id="reports-loading" class="reports-grid" style="display:none">
+        ${[1,2,3].map(()=>`<div class="skel-card"><div class="skel-line skeleton wide"></div><div class="skel-line skeleton short"></div><div class="skel-line skeleton" style="height:60px;margin-top:12px"></div></div>`).join('')}
+      </div>
+
+      <!-- Reports grid -->
+      <div class="reports-grid" id="reports-grid"></div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="reports-empty" style="display:none">
+        <div class="empty-icon">📂</div>
+        <div class="empty-title">No saved reports yet</div>
+        <div class="empty-sub">Upload an expense file and click <strong>Save Report</strong> to save your analysis. Reports are private to your account.</div>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('reset-btn').click()">
+          Upload a File
+        </button>
+      </div>
+
+      <!-- Saved comparison results -->
+      <div id="saved-comparison-results"></div>
+
+    </div><!-- /tab-reports -->
+
   </div><!-- /dashboard -->
 
 </main>
@@ -1093,9 +1358,15 @@ let gaugeChartInst = null;
 let rawHeaders = [], rawData = [];
 let colMap = { date:'', name:'', category:'', amount:'' };
 let isPro = false;
+let currentFileName = '';
 
 // Compare state
 let compareFiles = { a: null, b: null };
+
+// My Reports state
+const FREE_REPORT_LIMIT = 3;
+let selectedReportIds   = [];   // for cross-report comparison
+let cachedReports       = [];   // last loaded reports list
 
 /* ════════════════════════════════════════════════════
    PRO / PRICING
@@ -1119,7 +1390,11 @@ function activatePro() {
     renderHealthScore();
     renderForecast();
   }
-  alert('✨ Pro unlocked! You can now access all AI insights, health score, forecasting, and multi-file comparison.');
+  // Refresh My Reports if it's been loaded, so tier bar hides and compare buttons appear
+  if (cachedReports.length) renderReportCards(cachedReports);
+  document.getElementById('tier-usage-bar').style.display    = 'none';
+  document.getElementById('upc-block')?.remove();
+  alert('✨ Pro unlocked! Unlimited reports, multi-month comparison, and all AI features are now active.');
 }
 
 /* ════════════════════════════════════════════════════
@@ -1146,6 +1421,7 @@ function handleFileUpload(e) {
   if (file) processFile(file);
 }
 function processFile(file) {
+  currentFileName = file.name;
   showLoader();
   const reader = new FileReader();
   reader.onload = (ev) => {
@@ -1255,10 +1531,11 @@ function buildDashboard() {
   filtered = [...allRows]; currentPage=1; renderTable();
   if (isPro) { renderAllInsights(); renderHealthScore(); renderForecast(); }
   hideLoader();
-  document.getElementById('upload-section').style.display = 'none';
-  document.getElementById('dashboard').style.display      = 'block';
-  document.getElementById('reset-btn').style.display      = '';
-  document.getElementById('download-btn').style.display   = '';
+  document.getElementById('upload-section').style.display   = 'none';
+  document.getElementById('dashboard').style.display        = 'block';
+  document.getElementById('reset-btn').style.display        = '';
+  document.getElementById('download-btn').style.display     = '';
+  document.getElementById('save-report-btn').style.display  = '';
 }
 
 /* ════════════════════════════════════════════════════
@@ -1819,12 +2096,14 @@ function hideLoader(){ document.getElementById('loader').style.display='none'; }
 
 function resetApp(){
   allRows=[];filtered=[];rawHeaders=[];rawData=[];currentPage=1;
+  currentFileName='';
   compareFiles={a:null,b:null};
   document.getElementById('dashboard').style.display='none';
   document.getElementById('upload-section').style.display='';
   document.getElementById('column-map-banner').style.display='none';
   document.getElementById('reset-btn').style.display='none';
   document.getElementById('download-btn').style.display='none';
+  document.getElementById('save-report-btn').style.display='none';
   document.getElementById('file-input').value='';
   document.getElementById('search-input').value='';
   ['slot-a','slot-b'].forEach(id=>{
@@ -1953,6 +2232,472 @@ async function doSignup() {
     }
   } catch(e) { showAuthMsg('signup-error', 'Connection error. Please try again.'); }
   finally { setBtnLoading('signup-btn', false); }
+}
+
+/* ════════════════════════════════════════════════════
+   MY REPORTS — SAVE & LOAD
+════════════════════════════════════════════════════ */
+
+/* SQL users must run once in Supabase SQL editor */
+function getSetupSql() {
+  return `create table if not exists public.reports (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  file_name text not null,
+  report_name text not null,
+  total_amount numeric(14,2),
+  transaction_count integer,
+  top_category text,
+  top_category_amount numeric(14,2),
+  largest_expense numeric(14,2),
+  avg_expense numeric(14,2),
+  monthly_data jsonb,
+  category_data jsonb,
+  rows_data jsonb,
+  created_at timestamptz default now() not null
+);
+alter table public.reports enable row level security;
+create policy "Users view own reports"
+  on public.reports for select using (auth.uid() = user_id);
+create policy "Users insert own reports"
+  on public.reports for insert with check (auth.uid() = user_id);
+create policy "Users delete own reports"
+  on public.reports for delete using (auth.uid() = user_id);`;
+}
+
+function copySql() {
+  navigator.clipboard.writeText(getSetupSql()).then(() => {
+    const btn = document.querySelector('.dsn-copy');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy SQL', 2000);
+  });
+}
+
+/* ── Save Modal ── */
+async function openSaveModal() {
+  if (!supabaseClient || !allRows.length) return;
+
+  const total    = allRows.reduce((s,r)=>s+r.amount,0);
+  const catT     = {};
+  for(const r of allRows) catT[r.category]=(catT[r.category]||0)+r.amount;
+  const topCat   = Object.entries(catT).sort((a,b)=>b[1]-a[1])[0];
+
+  // Check report count for free users
+  let existingCount = 0;
+  if (!isPro && supabaseClient) {
+    try {
+      const { count } = await supabaseClient
+        .from('reports').select('id', { count:'exact', head:true });
+      existingCount = count || 0;
+    } catch(e) { existingCount = 0; }
+  }
+
+  const modal = document.getElementById('save-modal');
+  const preview = document.getElementById('save-summary-preview');
+  const formGroup = modal.querySelector('.form-group');
+  const saveBtn   = document.getElementById('do-save-btn');
+  const errEl     = document.getElementById('save-error');
+  const sucEl     = document.getElementById('save-success');
+  errEl.style.display = sucEl.style.display = 'none';
+  errEl.textContent = sucEl.textContent = '';
+
+  // Free limit reached?
+  if (!isPro && existingCount >= FREE_REPORT_LIMIT) {
+    preview.innerHTML = `
+      <div class="save-limit-warning">
+        <div class="slw-icon">🔒</div>
+        <div class="slw-title">Free plan limit reached</div>
+        <div class="slw-sub">You've used all <strong>${FREE_REPORT_LIMIT} free report slots</strong>. Upgrade to Pro for unlimited report saving, multi-month comparison, and advanced AI insights.</div>
+        <button class="auth-btn" style="max-width:260px;margin:0 auto" onclick="closeSaveModal();openPricing()">
+          <span class="btn-text">✦ Upgrade to Pro — $19/mo</span>
+        </button>
+      </div>`;
+    formGroup.style.display = 'none';
+    saveBtn.style.display   = 'none';
+  } else {
+    const slotsLeft = isPro ? '∞' : `${FREE_REPORT_LIMIT - existingCount} of ${FREE_REPORT_LIMIT}`;
+    preview.innerHTML = `
+      <div class="ss-item"><div class="ss-label">File</div><div class="ss-value">${escHtml(currentFileName||'Uploaded file')}</div></div>
+      <div class="ss-item"><div class="ss-label">Transactions</div><div class="ss-value">${allRows.length.toLocaleString()}</div></div>
+      <div class="ss-item"><div class="ss-label">Total Spend</div><div class="ss-value">${fmt(total)}</div></div>
+      <div class="ss-item"><div class="ss-label">Top Category</div><div class="ss-value">${escHtml(topCat[0])}</div></div>
+      ${!isPro ? `<div style="grid-column:1/-1;font-size:.72rem;color:var(--amber);font-weight:600;background:var(--amber-bg);padding:6px 10px;border-radius:7px">⚡ Free plan: ${slotsLeft} report slots remaining</div>` : ''}`;
+    formGroup.style.display = '';
+    saveBtn.style.display   = '';
+    // Auto-suggest a name
+    const d = new Date();
+    const mon = d.toLocaleString('default',{month:'long',year:'numeric'});
+    document.getElementById('report-name-input').value = `${currentFileName.replace(/\.[^.]+$/,'')||'Expenses'} — ${mon}`;
+  }
+
+  modal.classList.add('open');
+  setTimeout(()=>document.getElementById('report-name-input')?.focus(),100);
+}
+
+function closeSaveModal() {
+  document.getElementById('save-modal').classList.remove('open');
+}
+
+async function doSaveReport() {
+  if (!supabaseClient || !allRows.length) return;
+  const name = document.getElementById('report-name-input').value.trim();
+  const errEl = document.getElementById('save-error');
+  const sucEl = document.getElementById('save-success');
+  errEl.style.display = sucEl.style.display = 'none';
+  if (!name) { errEl.textContent='Please enter a report name.'; errEl.style.display='block'; return; }
+
+  const btn = document.getElementById('do-save-btn');
+  btn.disabled = true; btn.classList.add('loading');
+  btn.querySelector('.btn-text').textContent = 'Saving…';
+
+  try {
+    // Re-check limit for free users
+    if (!isPro) {
+      const { count } = await supabaseClient.from('reports').select('id',{count:'exact',head:true});
+      if ((count||0) >= FREE_REPORT_LIMIT) {
+        errEl.textContent = `Free plan limit (${FREE_REPORT_LIMIT} reports) reached. Upgrade to Pro for unlimited saves.`;
+        errEl.style.display = 'block'; return;
+      }
+    }
+
+    const total    = allRows.reduce((s,r)=>s+r.amount,0);
+    const catT     = {};
+    for(const r of allRows) catT[r.category]=(catT[r.category]||0)+r.amount;
+    const topEntry = Object.entries(catT).sort((a,b)=>b[1]-a[1])[0];
+    const largest  = allRows.reduce((m,r)=>r.amount>m?r.amount:m,0);
+    const monthly  = {};
+    for(const r of allRows) { const k=r.date?r.date.slice(0,7):'Unknown'; monthly[k]=(monthly[k]||0)+r.amount; }
+
+    const { error } = await supabaseClient.from('reports').insert({
+      file_name:           currentFileName || 'Uploaded file',
+      report_name:         name,
+      total_amount:        +total.toFixed(2),
+      transaction_count:   allRows.length,
+      top_category:        topEntry[0],
+      top_category_amount: +topEntry[1].toFixed(2),
+      largest_expense:     +largest.toFixed(2),
+      avg_expense:         +(total/allRows.length).toFixed(2),
+      monthly_data:        monthly,
+      category_data:       catT,
+      rows_data:           allRows.slice(0, 1000)   // cap at 1000 rows
+    });
+
+    if (error) {
+      if (error.code === '42P01') {   // table not found
+        errEl.innerHTML = 'Database table not found. Please open <strong>My Reports</strong> tab and follow the setup instructions.';
+      } else {
+        errEl.textContent = error.message;
+      }
+      errEl.style.display = 'block';
+    } else {
+      sucEl.textContent = '✓ Report saved to My Reports!';
+      sucEl.style.display = 'block';
+      setTimeout(()=>{ closeSaveModal(); cachedReports=[]; }, 1400);
+    }
+  } catch(e) {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.classList.remove('loading');
+    btn.querySelector('.btn-text').textContent = 'Save to My Reports →';
+  }
+}
+
+/* ── Load Reports ── */
+async function loadMyReports() {
+  const grid    = document.getElementById('reports-grid');
+  const empty   = document.getElementById('reports-empty');
+  const loading = document.getElementById('reports-loading');
+  const setup   = document.getElementById('db-setup-notice');
+  const tubBar  = document.getElementById('tier-usage-bar');
+  const savedCmp = document.getElementById('saved-comparison-results');
+  if(savedCmp) savedCmp.innerHTML='';
+  clearCompareSelection();
+
+  grid.innerHTML=''; empty.style.display='none'; setup.style.display='none';
+  loading.style.display='grid';
+
+  if (!supabaseClient) {
+    loading.style.display='none';
+    showReportsEmpty(); return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('reports')
+      .select('id,file_name,report_name,total_amount,transaction_count,top_category,top_category_amount,largest_expense,avg_expense,monthly_data,category_data,created_at')
+      .order('created_at', { ascending: false });
+
+    loading.style.display = 'none';
+
+    if (error) {
+      if (error.code === '42P01') {
+        setup.style.display = 'flex';
+        document.getElementById('setup-sql-block').textContent = getSetupSql();
+      } else {
+        grid.innerHTML = `<div style="color:var(--red);font-size:.85rem;padding:20px">${error.message}</div>`;
+      }
+      return;
+    }
+
+    cachedReports = data || [];
+    const count   = cachedReports.length;
+
+    // Update tier bar
+    if (!isPro) {
+      tubBar.style.display = 'flex';
+      const pct     = Math.min(100, (count/FREE_REPORT_LIMIT)*100);
+      const fill    = document.getElementById('tub-fill');
+      const txt     = document.getElementById('tub-count-text');
+      const sub     = document.getElementById('tub-sub-text');
+      const upgBtn  = document.getElementById('tub-upgrade-btn');
+      txt.textContent = `${count} / ${FREE_REPORT_LIMIT}`;
+      txt.className   = `tub-count ${count>=FREE_REPORT_LIMIT?'at-limit':count>=2?'near-limit':'ok'}`;
+      fill.style.width = pct+'%';
+      fill.className   = `tub-fill ${count>=FREE_REPORT_LIMIT?'f-limit':count>=2?'f-near':'f-ok'}`;
+      sub.textContent  = count >= FREE_REPORT_LIMIT
+        ? 'Limit reached — upgrade to Pro to save more reports'
+        : `Free plan · ${FREE_REPORT_LIMIT - count} slot${FREE_REPORT_LIMIT-count!==1?'s':''} remaining`;
+      upgBtn.style.display = count >= FREE_REPORT_LIMIT ? '' : 'none';
+    } else {
+      tubBar.style.display = 'none';
+    }
+
+    document.getElementById('reports-count-badge').textContent =
+      count ? `${count} report${count!==1?'s':''}` : '';
+
+    if (!count) { showReportsEmpty(); return; }
+
+    // Show upgrade prompt if at free limit
+    if (!isPro && count >= FREE_REPORT_LIMIT) {
+      const upc = document.createElement('div');
+      upc.className = 'upgrade-prompt-card'; upc.id = 'upc-block';
+      upc.innerHTML = `
+        <div class="upc-icon">🔒</div>
+        <div class="upc-title">You've reached the Free plan limit</div>
+        <div class="upc-sub">You have ${count} saved reports — the maximum for free users. Upgrade to Pro to save unlimited reports and unlock multi-month comparison.</div>
+        <div class="upc-features">
+          <span class="upc-feat">✦ Unlimited reports</span>
+          <span class="upc-feat">📊 Multi-month comparison</span>
+          <span class="upc-feat">🤖 Advanced AI insights</span>
+          <span class="upc-feat">📈 Expense forecasting</span>
+        </div>
+        <button class="btn btn-pro" onclick="openPricing()" style="margin:0 auto;display:flex">✦ Upgrade to Pro — $19/month</button>`;
+      grid.before(upc);
+    } else {
+      document.getElementById('upc-block')?.remove();
+    }
+
+    renderReportCards(cachedReports);
+
+  } catch(e) {
+    loading.style.display = 'none';
+    grid.innerHTML = `<div style="color:var(--red);font-size:.85rem;padding:20px">Error loading reports: ${e.message}</div>`;
+  }
+}
+
+function showReportsEmpty() {
+  document.getElementById('reports-empty').style.display = 'block';
+  document.getElementById('reports-count-badge').textContent = '';
+}
+
+function renderReportCards(reports) {
+  const grid = document.getElementById('reports-grid');
+  grid.innerHTML = reports.map(r => {
+    const date    = new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const isSelected = selectedReportIds.includes(r.id);
+    return `<div class="report-card${isSelected?' selected':''}" id="rc-${r.id}">
+      <div class="report-card-header">
+        <div>
+          <div class="report-card-name">${escHtml(r.report_name)}</div>
+          <div class="report-card-file">📄 ${escHtml(r.file_name)}</div>
+        </div>
+        <div class="report-card-date">${date}</div>
+      </div>
+      <div class="report-card-stats">
+        <div class="rcs-item"><div class="rcs-label">Total Spend</div><div class="rcs-value">${fmt(r.total_amount||0)}</div></div>
+        <div class="rcs-item"><div class="rcs-label">Transactions</div><div class="rcs-value">${(r.transaction_count||0).toLocaleString()}</div></div>
+        <div class="rcs-item"><div class="rcs-label">Avg Expense</div><div class="rcs-value">${fmt(r.avg_expense||0)}</div></div>
+        <div class="rcs-item"><div class="rcs-label">Largest</div><div class="rcs-value">${fmt(r.largest_expense||0)}</div></div>
+      </div>
+      <div class="report-card-cat">🏷️ ${escHtml(r.top_category||'—')}</div>
+      ${!isPro ? `
+      <div class="pro-lock-row">
+        <span class="lock-icon">🔒</span>
+        <span class="lock-text"><strong>Pro feature:</strong> Multi-month comparison — select 2 reports to compare</span>
+        <button class="btn btn-pro btn-sm" onclick="openPricing()" style="flex-shrink:0">Upgrade</button>
+      </div>` : ''}
+      <div class="report-card-actions">
+        <button class="btn-rc btn-rc-load" onclick="openSavedReport('${r.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+          View
+        </button>
+        ${isPro ? `<button class="btn-rc btn-rc-compare ${isSelected?'active':''}" onclick="toggleCompareSelect('${r.id}','${escHtml(r.report_name)}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z"/></svg>
+          ${isSelected?'✓ Selected':'Compare'}
+        </button>` : ''}
+        <button class="btn-rc btn-rc-del" onclick="deleteReport('${r.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          Delete
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Open Saved Report ── */
+async function openSavedReport(id) {
+  if (!supabaseClient) return;
+  const btn = document.querySelector(`#rc-${id} .btn-rc-load`);
+  if(btn){ btn.textContent='Loading…'; btn.disabled=true; }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('reports').select('*').eq('id', id).single();
+    if (error || !data) throw new Error(error?.message || 'Not found');
+
+    // Restore state from saved report
+    allRows        = data.rows_data || [];
+    currentFileName = data.file_name;
+    filtered = [...allRows]; currentPage = 1;
+
+    renderStats();
+    renderCharts();
+    renderFreeInsights();
+    renderTable();
+    if (isPro) { renderAllInsights(); renderHealthScore(); renderForecast(); }
+
+    document.getElementById('upload-section').style.display  = 'none';
+    document.getElementById('dashboard').style.display       = 'block';
+    document.getElementById('reset-btn').style.display       = '';
+    document.getElementById('download-btn').style.display    = '';
+    document.getElementById('save-report-btn').style.display = '';
+
+    // Switch to overview tab
+    const overviewTab = document.querySelector('.dash-tab');
+    switchTab('overview', overviewTab);
+  } catch(e) {
+    alert('Error loading report: '+e.message);
+  } finally {
+    if(btn){ btn.textContent='View'; btn.disabled=false; }
+  }
+}
+
+/* ── Delete Report ── */
+async function deleteReport(id) {
+  if (!confirm('Delete this report? This cannot be undone.')) return;
+  if (!supabaseClient) return;
+  try {
+    const { error } = await supabaseClient.from('reports').delete().eq('id', id);
+    if (error) { alert('Error: '+error.message); return; }
+    cachedReports = cachedReports.filter(r=>r.id!==id);
+    selectedReportIds = selectedReportIds.filter(x=>x!==id);
+    updateCompareStrip();
+    loadMyReports();   // refresh
+  } catch(e) { alert('Error: '+e.message); }
+}
+
+/* ── Cross-Report Comparison (Pro) ── */
+function toggleCompareSelect(id, name) {
+  if (!isPro) { openPricing(); return; }
+  const idx = selectedReportIds.indexOf(id);
+  if (idx === -1) {
+    if (selectedReportIds.length >= 2) {
+      alert('You can compare up to 2 reports at a time. Deselect one first.');
+      return;
+    }
+    selectedReportIds.push(id);
+  } else {
+    selectedReportIds.splice(idx,1);
+  }
+  renderReportCards(cachedReports);
+  updateCompareStrip();
+}
+
+function updateCompareStrip() {
+  const strip = document.getElementById('compare-strip');
+  if (selectedReportIds.length === 2) {
+    const names = selectedReportIds.map(id => {
+      const r = cachedReports.find(x=>x.id===id);
+      return r ? r.report_name : id;
+    });
+    document.getElementById('cs-names').textContent = `"${names[0]}" & "${names[1]}"`;
+    strip.style.display = 'flex';
+  } else {
+    strip.style.display = 'none';
+  }
+}
+
+function clearCompareSelection() {
+  selectedReportIds = [];
+  document.getElementById('compare-strip').style.display = 'none';
+  document.getElementById('saved-comparison-results').innerHTML = '';
+  if (cachedReports.length) renderReportCards(cachedReports);
+}
+
+function compareSelectedReports() {
+  if (!isPro) { openPricing(); return; }
+  if (selectedReportIds.length !== 2) return;
+  const [rA, rB] = selectedReportIds.map(id => cachedReports.find(r=>r.id===id));
+  if (!rA || !rB) return;
+
+  const change   = rA.total_amount > 0 ? ((rB.total_amount - rA.total_amount)/rA.total_amount*100).toFixed(1) : null;
+  const txChange = rA.transaction_count > 0 ? ((rB.transaction_count - rA.transaction_count)/rA.transaction_count*100).toFixed(1) : null;
+  const avgChange= rA.avg_expense > 0 ? ((rB.avg_expense - rA.avg_expense)/rA.avg_expense*100).toFixed(1) : null;
+  const cc = v => parseFloat(v) > 0 ? 'cc-up' : 'cc-down';
+  const ci = v => parseFloat(v) > 0 ? '↑' : '↓';
+
+  // Month-over-month breakdown
+  const mA = rA.monthly_data || {}, mB = rB.monthly_data || {};
+  const allMonths = [...new Set([...Object.keys(mA),...Object.keys(mB)])].sort();
+
+  // Category breakdown
+  const cA = rA.category_data || {}, cB = rB.category_data || {};
+  const allCats = [...new Set([...Object.keys(cA),...Object.keys(cB)])].sort();
+
+  const el = document.getElementById('saved-comparison-results');
+  el.innerHTML = `
+    <div style="font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:24px 0 14px">Comparison Results</div>
+    <div class="comparison-card">
+      <div class="comparison-title">Summary</div>
+      <div class="comp-stat-row">
+        <div class="comp-stat"><div class="comp-stat-label">Total (A)</div><div class="comp-stat-val">${fmt(rA.total_amount)}</div><div class="comp-stat-fname">${escHtml(rA.report_name)}</div></div>
+        <div class="comp-divider">→</div>
+        <div class="comp-stat"><div class="comp-stat-label">Total (B)</div><div class="comp-stat-val">${fmt(rB.total_amount)}</div><div class="comp-stat-fname">${escHtml(rB.report_name)}</div>${change!==null?`<div class="comp-change ${cc(change)}">${ci(change)} ${Math.abs(change)}%</div>`:''}</div>
+      </div>
+      <div class="comp-stat-row" style="margin-top:10px">
+        <div class="comp-stat"><div class="comp-stat-label">Avg/Transaction (A)</div><div class="comp-stat-val" style="font-size:.9rem">${fmt(rA.avg_expense)}</div></div>
+        <div class="comp-divider">→</div>
+        <div class="comp-stat"><div class="comp-stat-label">Avg/Transaction (B)</div><div class="comp-stat-val" style="font-size:.9rem">${fmt(rB.avg_expense)}</div>${avgChange!==null?`<div class="comp-change ${cc(avgChange)}">${ci(avgChange)} ${Math.abs(avgChange)}%</div>`:''}</div>
+      </div>
+    </div>
+    ${allMonths.length ? `
+    <div class="comparison-card">
+      <div class="comparison-title">Month-by-Month Breakdown</div>
+      ${allMonths.map(m => {
+        const va = mA[m]||0, vb = mB[m]||0;
+        const d  = va > 0 ? ((vb-va)/va*100).toFixed(1) : null;
+        return `<div class="comp-stat-row" style="margin-bottom:8px">
+          <div class="comp-stat" style="text-align:left"><div class="comp-stat-label">${m}</div><div class="comp-stat-val" style="font-size:.88rem">${fmt(va)}</div></div>
+          <div class="comp-divider">→</div>
+          <div class="comp-stat"><div class="comp-stat-val" style="font-size:.88rem">${fmt(vb)}</div>${d!==null?`<div class="comp-change ${cc(d)}">${ci(d)} ${Math.abs(d)}%</div>`:'<div class="comp-change cc-up">New</div>'}</div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+    <div class="comparison-card">
+      <div class="comparison-title">Category-by-Category Change</div>
+      ${allCats.map(cat => {
+        const va = cA[cat]||0, vb = cB[cat]||0;
+        const d  = va > 0 ? ((vb-va)/va*100).toFixed(1) : null;
+        return `<div class="comp-stat-row" style="margin-bottom:8px">
+          <div class="comp-stat" style="text-align:left"><div class="comp-stat-label">${escHtml(cat)}</div><div class="comp-stat-val" style="font-size:.88rem">${fmt(va)}</div></div>
+          <div class="comp-divider">→</div>
+          <div class="comp-stat"><div class="comp-stat-val" style="font-size:.88rem">${fmt(vb)}</div>${d!==null?`<div class="comp-change ${cc(d)}">${ci(d)} ${Math.abs(d)}%</div>`:'<div class="comp-change cc-up">New</div>'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  el.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 /* ── Sign Out ── */
